@@ -30,3 +30,7 @@ override.tf.json
 FunctionCode/
 
 terraform.tfvars
+
+# Node modules
+web/node_modules/
+.DS_Store
