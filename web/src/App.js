@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Heading,
   useToast,
@@ -20,8 +20,8 @@ import {
   Button,
   VStack,
   HStack,
-} from '@chakra-ui/react';
-import { FaDollarSign } from 'react-icons/fa';
+} from "@chakra-ui/react";
+import { FaDollarSign } from "react-icons/fa";
 
 const App = () => {
   return (
@@ -35,15 +35,15 @@ const App = () => {
 
 const WebForm = () => {
   const toast = useToast();
-  const [budget, setBudget] = useState('');
-  const [length, setLength] = useState('');
+  const [budget, setBudget] = useState("");
+  const [length, setLength] = useState("");
   const [tags, setTags] = useState([]);
-  const [newTagKey, setNewTagKey] = useState('');
-  const [newTagValue, setNewTagValue] = useState('');
+  const [newTagKey, setNewTagKey] = useState("");
+  const [newTagValue, setNewTagValue] = useState("");
   const [isValid, setIsValid] = useState(false);
 
   useEffect(() => {
-    if (budget !== '' && tags.length > 0 && length !== '') {
+    if (budget !== "" && tags.length > 0 && length !== "") {
       setIsValid(true);
     } else {
       setIsValid(false);
@@ -60,49 +60,49 @@ const WebForm = () => {
     };
 
     try {
-      const response = await fetch('http://example.com', {
-        method: 'POST',
+      const response = await fetch("http://example.com", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
         body: JSON.stringify(payload),
       });
-  
+
       if (response.ok) {
         toast({
-          title: 'Submission successful',
-          description: 'Your form has been submitted successfully.',
-          status: 'success',
+          title: "Submission successful",
+          description: "Your form has been submitted successfully.",
+          status: "success",
           duration: 3000,
           isClosable: true,
-          position: 'top',
+          position: "top",
         });
       } else {
         toast({
-          title: 'Submission failed',
-          description: 'There was a problem submitting your form.',
-          status: 'error',
+          title: "Submission failed",
+          description: "There was a problem submitting your form.",
+          status: "error",
           duration: 3000,
           isClosable: true,
-          position: 'top',
+          position: "top",
         });
       }
     } catch (error) {
       toast({
-        title: 'Submission failed',
-        description: 'There was a problem submitting your form. ',
-        status: 'error',
+        title: "Submission failed",
+        description: "There was a problem submitting your form. ",
+        status: "error",
         duration: 3000,
         isClosable: true,
-        position: 'top',
+        position: "top",
       });
     }
   };
 
   const handleAddTag = () => {
     setTags([...tags, { [newTagKey]: newTagValue }]);
-    setNewTagKey('');
-    setNewTagValue('');
+    setNewTagKey("");
+    setNewTagValue("");
   };
 
   return (
@@ -118,7 +118,7 @@ const WebForm = () => {
       >
         <form onSubmit={handleSubmit}>
           <VStack spacing={4}>
-          <Heading as="h1" size="lg">
+            <Heading as="h1" size="lg">
               Sandbox Request
             </Heading>
             <FormControl>
@@ -162,13 +162,13 @@ const WebForm = () => {
                     >
                       <TagLabel>{key}</TagLabel>: {value}
                       <TagCloseButton
-            colorScheme="red"
-            onClick={() => {
-              const newTags = [...tags];
-              newTags.splice(index, 1);
-              setTags(newTags);
-            }}
-          />
+                        colorScheme="red"
+                        onClick={() => {
+                          const newTags = [...tags];
+                          newTags.splice(index, 1);
+                          setTags(newTags);
+                        }}
+                      />
                     </Tag>
                   );
                 })}
