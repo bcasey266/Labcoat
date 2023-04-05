@@ -3,7 +3,12 @@ using namespace System.Net
 # Input bindings are passed in via param block.
 param($Request, $TriggerMetadata)
 
-Get-AzAccessToken
+if (((Get-AzAccessToken).ExpiresOn) -lt (get-date)) {
+    Write-Host "Token Expired. Re-authenticating."
+    Connect-AzAccount -Identity -AccountId $env:ManagedIdentityClientID
+}
+
+Set-AzContext -SubscriptionId $env:SandboxManagementSubscription | Out-Null
 
 # Write to the Azure Functions log stream.
 Write-Host "Received request to create a new Sandbox:"

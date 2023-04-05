@@ -77,6 +77,7 @@ resource "azurerm_windows_function_app" "this" {
     "StorageQueueDeleteSandbox"                = azurerm_storage_queue.deletesandbox.name
     "StorageTableSandbox"                      = azurerm_storage_table.sandboxtable.name
     "StorageTableCounter"                      = azurerm_storage_table.counter.name
+    "SandboxManagementSubscription"            = split("/", azurerm_resource_group.this.id)[2]
     "SandboxSubscription"                      = var.SandboxSubID
     "ManagedIdentityClientID"                  = azurerm_user_assigned_identity.this.client_id
   }

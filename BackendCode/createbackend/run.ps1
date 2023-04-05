@@ -9,6 +9,13 @@ $Budget = $QueueItem.Budget
 $Length = $QueueItem.Length
 $CostCenter = $QueueItem.CostCenter
 
+if (((Get-AzAccessToken).ExpiresOn) -lt (get-date)) {
+    Write-Host "Token Expired. Re-authenticating."
+    Connect-AzAccount -Identity -AccountId $env:ManagedIdentityClientID
+}
+
+Set-AzContext -SubscriptionId $env:SandboxManagementSubscription | Out-Null
+
 # Configure Storage Account Connection
 $StorageAccount = Get-AzStorageAccount -ResourceGroupName $env:ResourceGroupName -Name $env:StorageAccountName
 
