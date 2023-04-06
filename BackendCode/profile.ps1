@@ -11,7 +11,7 @@
 
 if ($env:MSI_SECRET) {
     Disable-AzContextAutosave -Scope Process | Out-Null
-    Update-AzConfig -DefaultSubscriptionForLogin $env:SandboxManagementSubscription
+    Update-AzConfig -DefaultSubscriptionForLogin $env:SandboxManagementSubscription | Out-Null
     Connect-AzAccount -Identity -AccountId $env:ManagedIdentityClientID
 }
 
