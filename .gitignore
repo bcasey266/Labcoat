@@ -32,5 +32,7 @@ Temp/
 terraform.tfvars
 
 # Node modules
-web/node_modules/
+FrontendCode/node_modules/
+
+# Mac Folder
 .DS_Store
