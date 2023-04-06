@@ -13,6 +13,26 @@ resource "azurerm_storage_share" "this" {
   quota                = 50
 }
 
+resource "azurerm_storage_queue" "newsandbox" {
+  name                 = "newsandbox"
+  storage_account_name = azurerm_storage_account.this.name
+}
+
+resource "azurerm_storage_queue" "deletesandbox" {
+  name                 = "deletesandbox"
+  storage_account_name = azurerm_storage_account.this.name
+}
+
+resource "azurerm_storage_table" "sandboxtable" {
+  name                 = "sandboxtable"
+  storage_account_name = azurerm_storage_account.this.name
+}
+
+resource "azurerm_storage_table" "counter" {
+  name                 = "counter"
+  storage_account_name = azurerm_storage_account.this.name
+}
+
 resource "azurerm_windows_function_app" "this" {
   name                = var.FunctionAppName
   resource_group_name = azurerm_resource_group.this.name
@@ -44,7 +64,6 @@ resource "azurerm_windows_function_app" "this" {
   service_plan_id                 = azurerm_service_plan.this.id
   https_only                      = true
   virtual_network_subnet_id       = azurerm_subnet.vnetintegration.id
-  zip_deploy_file                 = data.archive_file.function_app_code.output_path
 
   app_settings = {
     "WEBSITE_RUN_FROM_PACKAGE"                 = "1"
@@ -52,6 +71,15 @@ resource "azurerm_windows_function_app" "this" {
     "WEBSITE_CONTENTOVERVNET"                  = 1
     "WEBSITE_SKIP_CONTENTSHARE_VALIDATION"     = 1
     "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING" = "@Microsoft.KeyVault(SecretUri=${azurerm_key_vault_secret.sandboxmgmtstorage.versionless_id})"
+    "ResourceGroupName"                        = azurerm_resource_group.this.name
+    "StorageAccountName"                       = azurerm_storage_account.this.name
+    "StorageQueueNewSandbox"                   = azurerm_storage_queue.newsandbox.name
+    "StorageQueueDeleteSandbox"                = azurerm_storage_queue.deletesandbox.name
+    "StorageTableSandbox"                      = azurerm_storage_table.sandboxtable.name
+    "StorageTableCounter"                      = azurerm_storage_table.counter.name
+    "SandboxManagementSubscription"            = split("/", azurerm_resource_group.this.id)[2]
+    "SandboxSubscription"                      = var.SandboxSubID
+    "ManagedIdentityClientID"                  = azurerm_user_assigned_identity.this.client_id
   }
 
   identity {
@@ -79,17 +107,23 @@ resource "azurerm_windows_function_app" "this" {
 }
 
 ## Application Code
-resource "random_uuid" "AppChange" {
-  keepers = {
-    for filename in(
-      fileset("FunctionCode", "**")
-    ) :
-    filename => filemd5("FunctionCode/${filename}")
-  }
-}
-
 data "archive_file" "function_app_code" {
   type        = "zip"
-  source_dir  = "FunctionCode"
-  output_path = "function-${random_uuid.AppChange.result}.zip"
+  source_dir  = "BackendCode"
+  output_path = "Temp/backendcode.zip"
+}
+
+locals {
+  publish_code_command = "az webapp deployment source config-zip --resource-group ${azurerm_resource_group.this.name} --name ${azurerm_windows_function_app.this.name} --src ${data.archive_file.function_app_code.output_path} --only-show-errors > temp/output.txt"
+}
+
+resource "null_resource" "function_app_publish" {
+  provisioner "local-exec" {
+    command = local.publish_code_command
+  }
+  depends_on = [local.publish_code_command]
+  triggers = {
+    input_json           = filemd5(data.archive_file.function_app_code.output_path)
+    publish_code_command = local.publish_code_command
+  }
 }

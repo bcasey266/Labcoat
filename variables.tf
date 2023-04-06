@@ -19,6 +19,11 @@ variable "ResourceGroupName" {
 variable "KeyVaultName" {
   type        = string
   description = "Key Vault Name for ASAP to host secrets"
+
+  validation {
+    condition     = can(regex("[a-z0-9]+([-]?[a-z0-9]){3,24}", var.KeyVaultName))
+    error_message = "Storage Accounts can only contain lowercase characters and numbers"
+  }
 }
 
 variable "StorageAccountName" {
