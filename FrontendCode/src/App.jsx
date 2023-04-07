@@ -195,41 +195,6 @@ const WebForm = () => {
             <Heading as="h1" size="lg">
               Sandbox Request
             </Heading>
-            {/*  <FormControl>
-              <FormLabel>First Name</FormLabel>
-              <InputGroup>
-                <Input
-                  type="string"
-                  placeholder="John"
-                  value={FirstName}
-                  onChange={(e) => setFirstName(e.target.value)}
-                />
-              </InputGroup>
-            </FormControl>
-
-            <FormControl>
-              <FormLabel>Last Name</FormLabel>
-              <InputGroup>
-                <Input
-                  type="string"
-                  placeholder="Doe"
-                  value={LastName}
-                  onChange={(e) => setLastName(e.target.value)}
-                />
-              </InputGroup>
-            </FormControl>
-
-            <FormControl>
-              <FormLabel>Email</FormLabel>
-              <InputGroup>
-                <Input
-                  type="string"
-                  placeholder="John.Doe@company.com"
-                  value={Email}
-                  onChange={(e) => setEmail(e.target.value)}
-                />
-              </InputGroup>
-            </FormControl> */}
 
             <FormControl>
               <FormLabel>Manager Email</FormLabel>
@@ -274,17 +239,17 @@ const WebForm = () => {
               <FormLabel>Length</FormLabel>
               <RadioGroup onChange={setLength} value={Length}>
                 <Stack direction="row">
-                  <Radio value="30">30</Radio>
-                  <Radio value="60">60</Radio>
-                  <Radio value="90">90</Radio>
+                  <Radio value="1">1</Radio>
+                  <Radio value="2">2</Radio>
+                  <Radio value="3">3</Radio>
                 </Stack>
               </RadioGroup>
             </FormControl>
 
             <Button type="submit" colorScheme="blue" isDisabled={!isValid || isLoading}>
-  {isLoading ? <Spinner size="sm" mr={2} /> : null}
-  Submit
-</Button>
+              {isLoading ? <Spinner size="sm" mr={2} /> : null}
+              Submit
+            </Button>
           </VStack>
         </form>
       </Box>
