@@ -16,6 +16,7 @@ import {
   Stack,
   Button,
   VStack,
+  Spinner,
 } from '@chakra-ui/react';
 import { FaDollarSign } from 'react-icons/fa';
 
@@ -109,6 +110,7 @@ const WebForm = () => {
   const [Length, setLength] = useState('');
   const [CostCenter, setCostCenter] = useState([]);
   const [isValid, setIsValid] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
     if (Budget !== '' && Length !== '') {
@@ -120,6 +122,7 @@ const WebForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
 
     const payload = {
       "FirstName": (accounts[0].name).split(" ")[0],
@@ -151,6 +154,7 @@ const WebForm = () => {
           isClosable: true,
           position: 'top',
         });
+        setIsLoading(false);
       } else {
         toast({
           title: 'Submission failed',
@@ -160,6 +164,7 @@ const WebForm = () => {
           isClosable: true,
           position: 'top',
         });
+        setIsLoading(false);
       }
     } catch (error) {
       toast({
@@ -170,6 +175,7 @@ const WebForm = () => {
         isClosable: true,
         position: 'top',
       });
+      setIsLoading(false);
     }
   };
 
@@ -275,9 +281,10 @@ const WebForm = () => {
               </RadioGroup>
             </FormControl>
 
-            <Button type="submit" colorScheme="blue" isDisabled={!isValid}>
-              Submit
-            </Button>
+            <Button type="submit" colorScheme="blue" isDisabled={!isValid || isLoading}>
+  {isLoading ? <Spinner size="sm" mr={2} /> : null}
+  Submit
+</Button>
           </VStack>
         </form>
       </Box>
