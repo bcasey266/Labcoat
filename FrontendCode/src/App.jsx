@@ -17,57 +17,23 @@ import {
   Button,
   VStack,
   Spinner,
+  Flex,
+  IconButton,
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalCloseButton,
+  ModalBody,
+  Text
 } from '@chakra-ui/react';
-import { FaDollarSign } from 'react-icons/fa';
+import { FaDollarSign, FaUser } from 'react-icons/fa';
 
 import { PageLayout } from './components/PageLayout';
-import { loginRequest } from './authConfig';
-import { callMsGraph } from './graph';
-import { ProfileData } from './components/ProfileData';
 
 import { AuthenticatedTemplate, UnauthenticatedTemplate, useMsal, useMsalAuthentication } from '@azure/msal-react';
 
 import './App.css';
-
-
-/**
-* Renders information about the signed-in user or a button to retrieve data about the user
-*/
-const ProfileContent = () => {
-  const { instance, accounts } = useMsal();
-  const [graphData, setGraphData] = useState(null);
-
-  function RequestProfileData() {
-    // Silently acquires an access token which is then attached to a request for MS Graph data
-    instance
-      .acquireTokenSilent({
-        ...loginRequest,
-        account: accounts[0],
-      })
-      .then((response) => {
-        callMsGraph(response.accessToken).then((response) => setGraphData(response));
-      });
-  }
-
-  return (
-    <>
-      <h5 className="card-title">Welcome {accounts[0].name}</h5>
-      <br />
-      {graphData ? (
-        <ProfileData graphData={graphData} />
-      ) : (
-        <Button variant="secondary" onClick={RequestProfileData}>
-          Request Profile Information
-        </Button>
-      )}
-      <ChakraProvider>
-        <Box bg="gray.100" minHeight="100vh">
-          <WebForm />
-        </Box>
-      </ChakraProvider>
-    </>
-  );
-};
 
 /**
 * If a user is authenticated the ProfileContent component above is rendered. Otherwise a message indicating a user is not authenticated is rendered.
@@ -78,7 +44,11 @@ const MainContent = () => {
   return (
     <div className="App">
       <AuthenticatedTemplate>
-        <ProfileContent />
+        <ChakraProvider>
+          <Box bg="gray.100" minHeight="100vh">
+            <WebForm />
+          </Box>
+        </ChakraProvider>
       </AuthenticatedTemplate>
 
       <UnauthenticatedTemplate>
@@ -113,6 +83,16 @@ const WebForm = () => {
   const [isValid, setIsValid] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  const handleUserIconClick = () => {
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+  };
+
   useEffect(() => {
     if (Budget !== '' && Length !== '') {
       setIsValid(true);
@@ -129,7 +109,7 @@ const WebForm = () => {
       "FirstName": (accounts[0].name).split(" ")[0],
       "LastName": (accounts[0].name).split(" ")[1],
       "Email": (accounts[0].username),
-      "ObjectID": (accounts[0].id),
+      "ObjectID": (accounts[0].localAccountId),
       ManagerEmail,
       Budget,
       Length,
@@ -191,12 +171,20 @@ const WebForm = () => {
         mt={4}
         width="100%"
       >
+        <Flex alignItems="center" mb={4}>
+          <Heading as="h1" size="lg" flex="1">
+            Sandbox Request
+          </Heading>
+          {accounts[0].name.split(" ")[0]}
+          <IconButton
+            aria-label="User Icon"
+            icon={<FaUser />}
+            variant="ghost"
+            onClick={handleUserIconClick}
+          />
+        </Flex>
         <form onSubmit={handleSubmit}>
           <VStack spacing={4}>
-            <Heading as="h1" size="lg">
-              Sandbox Request
-            </Heading>
-
             <FormControl>
               <FormLabel>Manager Email</FormLabel>
               <InputGroup>
@@ -254,6 +242,18 @@ const WebForm = () => {
           </VStack>
         </form>
       </Box>
+      <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>User Info</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Text><b>Name:</b> {accounts[0].name}</Text>
+            <Text><b>Email:</b> {accounts[0].username}</Text>
+            <Text><b>Object ID:</b> {accounts[0].localAccountId}</Text>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </Container>
   );
 }
