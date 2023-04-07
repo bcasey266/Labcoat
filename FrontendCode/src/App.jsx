@@ -25,7 +25,7 @@ import { loginRequest } from './authConfig';
 import { callMsGraph } from './graph';
 import { ProfileData } from './components/ProfileData';
 
-import { AuthenticatedTemplate, UnauthenticatedTemplate, useMsal } from '@azure/msal-react';
+import { AuthenticatedTemplate, UnauthenticatedTemplate, useMsal, useMsalAuthentication } from '@azure/msal-react';
 
 import './App.css';
 
@@ -73,17 +73,18 @@ const ProfileContent = () => {
 * If a user is authenticated the ProfileContent component above is rendered. Otherwise a message indicating a user is not authenticated is rendered.
 */
 const MainContent = () => {
+  const {login, result, error} = useMsalAuthentication("redirect");
+  
   return (
     <div className="App">
       <AuthenticatedTemplate>
         <ProfileContent />
-
       </AuthenticatedTemplate>
 
       <UnauthenticatedTemplate>
         <h5>
           <center>
-            Please sign-in to see your profile information.
+            Please sign-in to create a sandbox.
           </center>
         </h5>
       </UnauthenticatedTemplate>
