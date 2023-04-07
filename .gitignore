@@ -33,6 +33,11 @@ terraform.tfvars
 
 # Node modules
 FrontendCode/node_modules/
+web/node_modules/
+
+# React Build Files
+FrontendCode/Build
+web/Build
 
 # Mac Folder
 .DS_Store
