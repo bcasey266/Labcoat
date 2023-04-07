@@ -1,12 +1,7 @@
 const express = require("express");
 const fetch = require("node-fetch");
 
-const app = express(),
-      bodyParser = require("body-parser");
-      port = 8080;
-
-app.use(bodyParser.json());
-app.use(express.static(process.cwd()+"/build/"));
+const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -41,12 +36,4 @@ app.get("/teams", async (req, res) => {
     console.error(error);
     res.status(500).json({ message: "Something went wrong" });
   }
-});
-
-app.get('/', (req,res) => {
-  res.sendFile(process.cwd()+"/build/index.html");
-});
-
-app.listen(port, () => {
-  console.log(`Server listening on the port::${port}`);
 });

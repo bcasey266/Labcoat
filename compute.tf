@@ -103,6 +103,9 @@ resource "azurerm_windows_function_app" "this" {
       name       = "Default Block"
       priority   = 1
     }
+    cors {
+      allowed_origins = ["http://localhost:3000"]
+    }
   }
 }
 
