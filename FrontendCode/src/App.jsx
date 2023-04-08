@@ -25,11 +25,13 @@ import {
   ModalHeader,
   ModalCloseButton,
   ModalBody,
-  Text
+  Text,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
 } from '@chakra-ui/react';
-import { FaDollarSign, FaUser } from 'react-icons/fa';
-
-import { PageLayout } from './components/PageLayout';
+import { FaDollarSign, FaUser, FaHamburger, FaDoorOpen, FaVectorSquare } from 'react-icons/fa';
 
 import { AuthenticatedTemplate, UnauthenticatedTemplate, useMsal, useMsalAuthentication } from '@azure/msal-react';
 
@@ -38,9 +40,10 @@ import './App.css';
 /**
 * If a user is authenticated the ProfileContent component above is rendered. Otherwise a message indicating a user is not authenticated is rendered.
 */
-const MainContent = () => {
-  const {login, result, error} = useMsalAuthentication("redirect");
-  
+
+export default function App() {
+  const { login, result, error } = useMsalAuthentication("redirect");
+
   return (
     <div className="App">
       <AuthenticatedTemplate>
@@ -62,19 +65,9 @@ const MainContent = () => {
   );
 };
 
-export default function App() {
-  return (
-    <PageLayout>
-      <center>
-        <MainContent />
-      </center>
-    </PageLayout>
-
-  );
-};
-
 const WebForm = () => {
   const toast = useToast();
+  
   var { instance, accounts } = useMsal();
   const [ManagerEmail, setManagerEmail] = useState('');
   const [Budget, setBudget] = useState('');
@@ -175,13 +168,25 @@ const WebForm = () => {
           <Heading as="h1" size="lg" flex="1">
             Sandbox Request
           </Heading>
-          {accounts[0].name.split(" ")[0]}
-          <IconButton
-            aria-label="User Icon"
-            icon={<FaUser />}
-            variant="ghost"
-            onClick={handleUserIconClick}
-          />
+          <Menu>
+            <MenuButton
+              as={IconButton}
+              aria-label='Options'
+              icon={<FaHamburger />}
+              variant='outline'
+            />
+            <MenuList>
+              <MenuItem icon={<FaUser />} onClick={handleUserIconClick}>
+                Info
+              </MenuItem>
+              <MenuItem icon={<FaVectorSquare />}>
+                My Sandboxes
+              </MenuItem>
+              <MenuItem icon={<FaDoorOpen />} onClick={() => instance.logoutRedirect()}>
+                Sign Out
+              </MenuItem>
+            </MenuList>
+          </Menu>
         </Flex>
         <form onSubmit={handleSubmit}>
           <VStack spacing={4}>
