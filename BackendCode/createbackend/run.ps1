@@ -80,7 +80,10 @@ $SandboxTable = (Get-AzStorageTable -Name $env:StorageTableSandbox -Context $Sto
 $enddate = (Get-Date).AddDays([int]$Length).ToString("yyyy-MM-dd") 
 Add-AzTableRow -Table $SandboxTable -PartitionKey "Sandbox" -RowKey $SandboxName -Property @{
     "SandboxName"  = $SandboxName
+    "FirstName"    = $FirstName
+    "LastName"     = $LastName
     "User"         = $Email
+    "ObjectID"     = $QueueItem.ObjectID
     "ManagerEmail" = $ManagerEmail
     "CreationDate" = (Get-Date).ToString("yyyy-MM-dd")
     "EndDate"      = $enddate
