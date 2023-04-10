@@ -30,13 +30,13 @@ import {
   MenuButton,
   MenuList,
   MenuItem,
+  MenuDivider,
 } from '@chakra-ui/react';
 import { FaDollarSign, FaUser, FaHamburger, FaDoorOpen, FaVectorSquare } from 'react-icons/fa';
 
 import { AuthenticatedTemplate, UnauthenticatedTemplate, useMsal, useMsalAuthentication } from '@azure/msal-react';
 
 import './App.css';
-
 /**
 * If a user is authenticated the ProfileContent component above is rendered. Otherwise a message indicating a user is not authenticated is rendered.
 */
@@ -177,9 +177,10 @@ const WebForm = () => {
             />
             <MenuList>
               <MenuItem icon={<FaUser />} onClick={handleUserIconClick}>
-                Info
+                {accounts[0].name}
               </MenuItem>
-              <MenuItem icon={<FaVectorSquare />}>
+              <MenuDivider />
+              <MenuItem icon={<FaVectorSquare />} isDisabled='true'>
                 My Sandboxes
               </MenuItem>
               <MenuItem icon={<FaDoorOpen />} onClick={() => instance.logoutRedirect()}>
@@ -247,8 +248,11 @@ const WebForm = () => {
           </VStack>
         </form>
       </Box>
-      <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
-        <ModalOverlay />
+      <Modal isOpen={isModalOpen} onClose={handleCloseModal}> 
+        <ModalOverlay
+          bg='blackAlpha.300'
+          backdropFilter='blur(10px) hue-rotate(90deg)'
+        />
         <ModalContent>
           <ModalHeader>User Info</ModalHeader>
           <ModalCloseButton />
