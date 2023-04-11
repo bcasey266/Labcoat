@@ -94,57 +94,70 @@ const WebForm = () => {
     }
   }, [Budget, Length]);
 
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  setIsLoading(true);
-  console.log(accounts[0]);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsLoading(true);
+    console.log(accounts[0]);
 
-  const payload = {
-    "FirstName": (accounts[0].name).split(" ")[0],
-    "LastName": (accounts[0].name).split(" ")[1],
-    "Email": (accounts[0].username),
-    "ObjectID": (accounts[0].localAccountId),
-    ManagerEmail,
-    Budget,
-    Length,
-    CostCenter,
-  };
-
-  try {
-    const accessTokenRequest = {
-      scopes: ["User.Read"],
-      account: accounts[0],
+    const payload = {
+      "FirstName": (accounts[0].name).split(" ")[0],
+      "LastName": (accounts[0].name).split(" ")[1],
+      "Email": (accounts[0].username),
+      "ObjectID": (accounts[0].localAccountId),
+      ManagerEmail,
+      Budget,
+      Length,
+      CostCenter,
     };
 
-    instance
-      .acquireTokenSilent(accessTokenRequest)
-      .then(async (accessTokenResponse) => {
-        // Acquire token silent success
-        let accessToken = accessTokenResponse.accessToken;
+    try {
+      const accessTokenRequest = {
+        scopes: ["User.Read"],
+        account: accounts[0],
+      };
 
-        const response = await fetch('https://apim-sandboxmgmt-prod.azure-api.net/sandbox/create', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': 'Bearer ' + accessToken,
-            'Access-Control-Allow-Origin': '*'
-          },
-          body: JSON.stringify(payload),
-        });
+      instance
+        .acquireTokenSilent(accessTokenRequest)
+        .then(async (accessTokenResponse) => {
+          // Acquire token silent success
+          let accessToken = accessTokenResponse.idToken;
+          console.log(accessTokenResponse)
 
-        console.log(accessToken)
-
-        if (response.ok) {
-          toast({
-            title: 'Submission successful',
-            description: 'Your form has been submitted successfully.',
-            status: 'success',
-            duration: 3000,
-            isClosable: true,
-            position: 'top',
+          const response = await fetch('https://apim-sandboxmgmt-prod.azure-api.net/sandbox/create', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + accessToken,
+            },
+            body: JSON.stringify(payload),
           });
-          setIsLoading(false);
-        } else {
+
+          console.log(accessToken)
+
+          if (response.ok) {
+            toast({
+              title: 'Submission successful',
+              description: 'Your form has been submitted successfully.',
+              status: 'success',
+              duration: 3000,
+              isClosable: true,
+              position: 'top',
+            });
+            setIsLoading(false);
+          } else {
+            toast({
+              title: 'Submission failed',
+              description: 'There was a problem submitting your form.',
+              status: 'error',
+              duration: 3000,
+              isClosable: true,
+              position: 'top',
+            });
+            setIsLoading(false);
+          }
+        })
+        .catch((error) => {
+          // Handle error here
           toast({
             title: 'Submission failed',
             description: 'There was a problem submitting your form.',
@@ -154,32 +167,19 @@ const handleSubmit = async (e) => {
             position: 'top',
           });
           setIsLoading(false);
-        }
-      })
-      .catch((error) => {
-        // Handle error here
-        toast({
-          title: 'Submission failed',
-          description: 'There was a problem submitting your form.',
-          status: 'error',
-          duration: 3000,
-          isClosable: true,
-          position: 'top',
         });
-        setIsLoading(false);
+    } catch (error) {
+      toast({
+        title: 'Submission failed',
+        description: 'There was a problem submitting your form. ',
+        status: 'error',
+        duration: 3000,
+        isClosable: true,
+        position: 'top',
       });
-  } catch (error) {
-    toast({
-      title: 'Submission failed',
-      description: 'There was a problem submitting your form. ',
-      status: 'error',
-      duration: 3000,
-      isClosable: true,
-      position: 'top',
-    });
-    setIsLoading(false);
-  }
-};
+      setIsLoading(false);
+    }
+  };
 
   return (
     <Container maxW="container.md" py={8}>
