@@ -18,6 +18,8 @@ import {
   Box,
   IconButton,
   Flex,
+  Spinner,
+  Tooltip
 } from "@chakra-ui/react";
 
 import { DeleteIcon, RepeatIcon, LinkIcon } from "@chakra-ui/icons";
@@ -59,7 +61,7 @@ const data = [
     Etag: "W/\"datetime'2023-04-11T19%3A30%3A35.3330604Z'\"",
   },
   {
-    Status: "Active",
+    Status: "Disabled",
     Budget: "345345",
     SandboxName: "Sandbox-Brandon-Casey-12",
     ManagerEmail: "456345",
@@ -76,7 +78,7 @@ const data = [
     Etag: "W/\"datetime'2023-04-11T19%3A53%3A34.9777816Z'\"",
   },
   {
-    Status: "Active",
+    Status: "Deleting",
     Budget: "345",
     SandboxName: "Sandbox-Brandon-Casey-13",
     ManagerEmail: "xcvxcvzxc",
@@ -232,6 +234,8 @@ const TableModal = ({ isOpen, onClose }) => {
                                 ? "red.500"
                                 : item[field] === "Deleting"
                                 ? "orange.500"
+                                : item[field] === "Resetting"
+                                ? "orange.500"
                                 : null
                               : null
                           }
@@ -246,33 +250,64 @@ const TableModal = ({ isOpen, onClose }) => {
                       ))}
                       <Td>
                         <Flex justifyContent="center">
-                          <IconButton
-                            aria-label="Reset Sandbox"
-                            icon={<RepeatIcon />}
-                            size="sm"
-                            onClick={() => handleResetClick(item)}
-                            isDisabled
-                          />
+                          <Box>
+                            {item.Status === "Resetting" ? (
+                              <Spinner size="sm" />
+                            ) : (
+                              <Tooltip
+                                label="Reset Sandbox"
+                                aria-label="Reset Sandbox"
+                                openDelay={500}
+                              >
+                                <IconButton
+                                  aria-label="Reset Sandbox"
+                                  icon={<RepeatIcon />}
+                                  size="sm"
+                                  onClick={() => handleResetClick(item)}
+                                  isDisabled
+                                />
+                              </Tooltip>
+                            )}
+                          </Box>
                         </Flex>
                       </Td>
                       <Td>
                         <Flex justifyContent="center">
-                          <IconButton
-                            aria-label="Delete Sandbox"
-                            icon={<DeleteIcon />}
-                            size="sm"
-                            onClick={() => handleDeleteClick(item)}
-                          />
+                          <Box>
+                            {item.Status === "Deleting" ? (
+                              <Spinner size="sm" />
+                            ) : (
+                              <Tooltip
+                                label="Delete Sandbox"
+                                aria-label="Delete Sandbox"
+                                openDelay={500}
+                              >
+                                <IconButton
+                                  aria-label="Delete Sandbox"
+                                  icon={<DeleteIcon />}
+                                  size="sm"
+                                  onClick={() => handleDeleteClick(item)}
+                                  isDisabled={item.Status !== "Active"}
+                                />
+                              </Tooltip>
+                            )}
+                          </Box>
                         </Flex>
                       </Td>
                       <Td>
                         <Flex justifyContent="center">
-                          <IconButton
+                          <Tooltip
+                            label="View Sandbox"
                             aria-label="View Sandbox"
-                            icon={<LinkIcon />}
-                            size="sm"
-                            onClick={() => handleLink(item)}
-                          />
+                            openDelay={500}
+                          >
+                            <IconButton
+                              icon={<LinkIcon />}
+                              size="sm"
+                              onClick={() => handleLink(item)}
+                              isDisabled={item.Status !== "Active"}
+                            />
+                          </Tooltip>
                         </Flex>
                       </Td>
                     </Tr>
