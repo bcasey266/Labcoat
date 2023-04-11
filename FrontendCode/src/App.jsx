@@ -67,7 +67,7 @@ export default function App() {
 
 const WebForm = () => {
   const toast = useToast();
-  
+
   var { instance, accounts } = useMsal();
   const [ManagerEmail, setManagerEmail] = useState('');
   const [Budget, setBudget] = useState('');
@@ -97,6 +97,7 @@ const WebForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    console.log(accounts[0]);
 
     const payload = {
       "FirstName": (accounts[0].name).split(" ")[0],
@@ -110,36 +111,63 @@ const WebForm = () => {
     };
 
     try {
-      const response = await fetch('https://func-sandboxmgmt-prod.azurewebsites.net/api/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-functions-key': 'G5JbjU7eXU-MwyqDFbR1N0cJfILyqK8ESuAQWw0Vy6UiAzFuuMxqMw=='
-        },
-        body: JSON.stringify(payload),
-      });
+      const accessTokenRequest = {
+        scopes: ["User.Read"],
+        account: accounts[0],
+      };
 
-      if (response.ok) {
-        toast({
-          title: 'Submission successful',
-          description: 'Your form has been submitted successfully.',
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-          position: 'top',
+      instance
+        .acquireTokenSilent(accessTokenRequest)
+        .then(async (accessTokenResponse) => {
+          // Acquire token silent success
+          let accessToken = accessTokenResponse.idToken;
+          console.log(accessTokenResponse)
+
+          const response = await fetch('https://apim-sandboxmgmt-prod.azure-api.net/sandbox/create', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer ' + accessToken,
+            },
+            body: JSON.stringify(payload),
+          });
+
+          console.log(accessToken)
+
+          if (response.ok) {
+            toast({
+              title: 'Submission successful',
+              description: 'Your form has been submitted successfully.',
+              status: 'success',
+              duration: 3000,
+              isClosable: true,
+              position: 'top',
+            });
+            setIsLoading(false);
+          } else {
+            toast({
+              title: 'Submission failed',
+              description: 'There was a problem submitting your form.',
+              status: 'error',
+              duration: 3000,
+              isClosable: true,
+              position: 'top',
+            });
+            setIsLoading(false);
+          }
+        })
+        .catch((error) => {
+          // Handle error here
+          toast({
+            title: 'Submission failed',
+            description: 'There was a problem submitting your form.',
+            status: 'error',
+            duration: 3000,
+            isClosable: true,
+            position: 'top',
+          });
+          setIsLoading(false);
         });
-        setIsLoading(false);
-      } else {
-        toast({
-          title: 'Submission failed',
-          description: 'There was a problem submitting your form.',
-          status: 'error',
-          duration: 3000,
-          isClosable: true,
-          position: 'top',
-        });
-        setIsLoading(false);
-      }
     } catch (error) {
       toast({
         title: 'Submission failed',
@@ -248,7 +276,7 @@ const WebForm = () => {
           </VStack>
         </form>
       </Box>
-      <Modal isOpen={isModalOpen} onClose={handleCloseModal}> 
+      <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
         <ModalOverlay
           bg='blackAlpha.300'
           backdropFilter='blur(10px) hue-rotate(90deg)'

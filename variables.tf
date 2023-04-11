@@ -10,6 +10,11 @@ variable "SandboxSubID" {
   description = "The Subscription ID of the Sandbox Subscription"
 }
 
+variable "AzureADTenantID" {
+  type        = string
+  description = "The Azure AD Tenant ID is utilized to create and manage App APIs"
+}
+
 ### management.tf Variables
 variable "ResourceGroupName" {
   type        = string
@@ -61,4 +66,10 @@ variable "ServicePlanName" {
 variable "FunctionAppName" {
   type        = string
   description = "Function App Name for ASAP"
+}
+
+### APIM.tf Variables
+variable "APIMName" {
+  type        = string
+  description = "Azure APIM Name for ASAP"
 }
