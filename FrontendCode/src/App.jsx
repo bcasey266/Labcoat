@@ -37,6 +37,8 @@ import { FaDollarSign, FaUser, FaHamburger, FaDoorOpen, FaVectorSquare } from 'r
 import { AuthenticatedTemplate, UnauthenticatedTemplate, useMsal, useMsalAuthentication } from '@azure/msal-react';
 
 import './App.css';
+import './components/TableModal.js'
+import TableModal from './components/TableModal.js';
 /**
 * If a user is authenticated the ProfileContent component above is rendered. Otherwise a message indicating a user is not authenticated is rendered.
 */
@@ -85,6 +87,10 @@ const WebForm = () => {
   const handleCloseModal = () => {
     setIsModalOpen(false);
   };
+
+  const [isSandboxModalOpen, setIsSandboxModalOpen] = useState(false);
+  const onSandboxClose = () => setIsSandboxModalOpen(false);
+  const onSandboxOpen = () => setIsSandboxModalOpen(true);
 
   useEffect(() => {
     if (Budget !== '' && Length !== '') {
@@ -208,9 +214,10 @@ const WebForm = () => {
                 {accounts[0].name}
               </MenuItem>
               <MenuDivider />
-              <MenuItem icon={<FaVectorSquare />} isDisabled='true'>
+              <MenuItem icon={<FaVectorSquare />} onClick={onSandboxOpen}>
                 My Sandboxes
               </MenuItem>
+              <TableModal isOpen={isSandboxModalOpen} onClose={onSandboxClose} />
               <MenuItem icon={<FaDoorOpen />} onClick={() => instance.logoutRedirect()}>
                 Sign Out
               </MenuItem>
