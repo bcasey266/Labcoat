@@ -128,5 +128,6 @@ resource "null_resource" "function_app_publish" {
   triggers = {
     input_json           = filemd5(data.archive_file.function_app_code.output_path)
     publish_code_command = local.publish_code_command
+    deploy_target        = azurerm_windows_function_app.this.id
   }
 }

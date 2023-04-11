@@ -67,7 +67,7 @@ export default function App() {
 
 const WebForm = () => {
   const toast = useToast();
-  
+
   var { instance, accounts } = useMsal();
   const [ManagerEmail, setManagerEmail] = useState('');
   const [Budget, setBudget] = useState('');
@@ -97,6 +97,8 @@ const WebForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+    console.log(accounts[0])
+
 
     const payload = {
       "FirstName": (accounts[0].name).split(" ")[0],
@@ -108,13 +110,13 @@ const WebForm = () => {
       Length,
       CostCenter,
     };
-
     try {
-      const response = await fetch('https://func-sandboxmgmt-prod.azurewebsites.net/api/create', {
+      const response = await fetch('https://apim-sandboxmgmt-prod.azure-api.net/sandbox/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'x-functions-key': 'G5JbjU7eXU-MwyqDFbR1N0cJfILyqK8ESuAQWw0Vy6UiAzFuuMxqMw=='
+          'Authorization': 'Bearer ' + accounts[0].idToken,
+          'Access-Control-Allow-Origin': '*'
         },
         body: JSON.stringify(payload),
       });
@@ -248,7 +250,7 @@ const WebForm = () => {
           </VStack>
         </form>
       </Box>
-      <Modal isOpen={isModalOpen} onClose={handleCloseModal}> 
+      <Modal isOpen={isModalOpen} onClose={handleCloseModal}>
         <ModalOverlay
           bg='blackAlpha.300'
           backdropFilter='blur(10px) hue-rotate(90deg)'
