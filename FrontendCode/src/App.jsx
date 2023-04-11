@@ -94,55 +94,70 @@ const WebForm = () => {
     }
   }, [Budget, Length]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    console.log(accounts[0])
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setIsLoading(true);
+  console.log(accounts[0]);
 
+  const payload = {
+    "FirstName": (accounts[0].name).split(" ")[0],
+    "LastName": (accounts[0].name).split(" ")[1],
+    "Email": (accounts[0].username),
+    "ObjectID": (accounts[0].localAccountId),
+    ManagerEmail,
+    Budget,
+    Length,
+    CostCenter,
+  };
 
-    const payload = {
-      "FirstName": (accounts[0].name).split(" ")[0],
-      "LastName": (accounts[0].name).split(" ")[1],
-      "Email": (accounts[0].username),
-      "ObjectID": (accounts[0].localAccountId),
-      ManagerEmail,
-      Budget,
-      Length,
-      CostCenter,
+  try {
+    const accessTokenRequest = {
+      scopes: ["User.Read"],
+      account: accounts[0],
     };
-    try {
-      const accessTokenRequest = {
-        scopes: ["User.Read"],
-        account: accounts[0],
-      };
-      instance
-        .acquireTokenSilent(accessTokenRequest)
-        .then((accessTokenResponse) => {
-          // Acquire token silent success
-          let accessToken = accessTokenResponse.accessToken;
-        })
 
-      const response = await fetch('https://apim-sandboxmgmt-prod.azure-api.net/sandbox/create', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + accessToken,
-          'Access-Control-Allow-Origin': '*'
-        },
-        body: JSON.stringify(payload),
-      });
+    instance
+      .acquireTokenSilent(accessTokenRequest)
+      .then(async (accessTokenResponse) => {
+        // Acquire token silent success
+        let accessToken = accessTokenResponse.accessToken;
 
-      if (response.ok) {
-        toast({
-          title: 'Submission successful',
-          description: 'Your form has been submitted successfully.',
-          status: 'success',
-          duration: 3000,
-          isClosable: true,
-          position: 'top',
+        const response = await fetch('https://apim-sandboxmgmt-prod.azure-api.net/sandbox/create', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + accessToken,
+            'Access-Control-Allow-Origin': '*'
+          },
+          body: JSON.stringify(payload),
         });
-        setIsLoading(false);
-      } else {
+
+        console.log(accessToken)
+
+        if (response.ok) {
+          toast({
+            title: 'Submission successful',
+            description: 'Your form has been submitted successfully.',
+            status: 'success',
+            duration: 3000,
+            isClosable: true,
+            position: 'top',
+          });
+          setIsLoading(false);
+        } else {
+          toast({
+            title: 'Submission failed',
+            description: 'There was a problem submitting your form.',
+            status: 'error',
+            duration: 3000,
+            isClosable: true,
+            position: 'top',
+          });
+          setIsLoading(false);
+        }
+      })
+      .catch((error) => {
+        // Handle error here
         toast({
           title: 'Submission failed',
           description: 'There was a problem submitting your form.',
@@ -152,19 +167,19 @@ const WebForm = () => {
           position: 'top',
         });
         setIsLoading(false);
-      }
-    } catch (error) {
-      toast({
-        title: 'Submission failed',
-        description: 'There was a problem submitting your form. ',
-        status: 'error',
-        duration: 3000,
-        isClosable: true,
-        position: 'top',
       });
-      setIsLoading(false);
-    }
-  };
+  } catch (error) {
+    toast({
+      title: 'Submission failed',
+      description: 'There was a problem submitting your form. ',
+      status: 'error',
+      duration: 3000,
+      isClosable: true,
+      position: 'top',
+    });
+    setIsLoading(false);
+  }
+};
 
   return (
     <Container maxW="container.md" py={8}>
