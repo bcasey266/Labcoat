@@ -111,11 +111,22 @@ const WebForm = () => {
       CostCenter,
     };
     try {
+      const accessTokenRequest = {
+        scopes: ["User.Read"],
+        account: accounts[0],
+      };
+      instance
+        .acquireTokenSilent(accessTokenRequest)
+        .then((accessTokenResponse) => {
+          // Acquire token silent success
+          let accessToken = accessTokenResponse.accessToken;
+        })
+
       const response = await fetch('https://apim-sandboxmgmt-prod.azure-api.net/sandbox/create', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + accounts[0].idToken,
+          'Authorization': 'Bearer ' + accessToken,
           'Access-Control-Allow-Origin': '*'
         },
         body: JSON.stringify(payload),
