@@ -1,5 +1,5 @@
 // TableModal.js
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Button,
   Modal,
@@ -19,7 +19,8 @@ import {
   IconButton,
   Flex,
   Spinner,
-  Tooltip
+  Tooltip,
+  useToast,
 } from "@chakra-ui/react";
 
 import { DeleteIcon, RepeatIcon, LinkIcon } from "@chakra-ui/icons";
@@ -161,6 +162,10 @@ const TableModal = ({ isOpen, onClose }) => {
   const [isDeleteOpen, setisDeleteOpen] = React.useState(false);
   const [isResetOpen, setisResetOpen] = React.useState(false);
   const [selectedSandbox, setSelectedSandbox] = React.useState(null);
+  const toast = useToast();
+  const [showActiveOnly, setShowActiveOnly] = useState(
+    localStorage.getItem("showActiveOnly") === "true" ? true : false
+  );
 
   const handleDeleteClick = (sandbox) => {
     setSelectedSandbox(sandbox);
@@ -184,12 +189,26 @@ const TableModal = ({ isOpen, onClose }) => {
     console.log("Deleting sandbox:", selectedSandbox.SandboxName);
     // Add delete logic here
     handleDeleteConfirmClose();
+    toast({
+      title: "Submission Received",
+      description: `Sandbox ${selectedSandbox.SandboxName} has been queued for deletion.`,
+      status: "success",
+      duration: 5000,
+      isClosable: true,
+    });
   };
 
   const handleResetSandbox = () => {
     console.log("Resetting sandbox:", selectedSandbox.SandboxName);
     // Add reset logic here
     handleResetConfirmClose();
+    toast({
+      title: "Submission Received",
+      description: `Sandbox ${selectedSandbox.SandboxName} has been queued for reset.`,
+      status: "success",
+      duration: 5000,
+      isClosable: true,
+    });
   };
 
   const handleLink = (sandbox) => {
@@ -199,6 +218,14 @@ const TableModal = ({ isOpen, onClose }) => {
   };
 
   const headers = [...fieldsToDisplay, "Reset", "Delete", "Browse"];
+
+  const filteredData = showActiveOnly
+    ? data.filter((item) => item.Status === "Active")
+    : data;
+
+  useEffect(() => {
+    localStorage.setItem("showActiveOnly", showActiveOnly);
+  }, [showActiveOnly]);
 
   return (
     <>
@@ -211,6 +238,11 @@ const TableModal = ({ isOpen, onClose }) => {
           <ModalHeader>My Sandboxes</ModalHeader>
           <ModalCloseButton />
           <ModalBody maxHeight="70vh">
+            <Flex justifyContent="flex-end">
+              <Button onClick={() => setShowActiveOnly(!showActiveOnly)}>
+                {showActiveOnly ? "Show All" : "Show Active Only"}
+              </Button>
+            </Flex>
             <Box maxHeight="70vh" overflowY="auto">
               <Table variant="simple">
                 <Thead>
@@ -221,7 +253,7 @@ const TableModal = ({ isOpen, onClose }) => {
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {data.map((item, index) => (
+                  {filteredData.map((item, index) => (
                     <Tr key={index}>
                       {fieldsToDisplay.map((field) => (
                         <Td
