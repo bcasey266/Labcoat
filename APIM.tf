@@ -25,13 +25,14 @@ resource "azurerm_api_management_backend" "this" {
 }
 
 resource "azurerm_api_management_api" "this" {
-  name                = "sandbox2"
-  resource_group_name = azurerm_resource_group.this.name
-  api_management_name = azurerm_api_management.this.name
-  revision            = 1
-  display_name        = "sandbox2"
-  path                = "sandbox2"
-  protocols           = ["https"]
+  name                  = "sandbox2"
+  resource_group_name   = azurerm_resource_group.this.name
+  api_management_name   = azurerm_api_management.this.name
+  revision              = 1
+  display_name          = "sandbox2"
+  path                  = "sandbox2"
+  protocols             = ["https"]
+  subscription_required = false
 }
 
 resource "azurerm_api_management_api_policy" "this" {

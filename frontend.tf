@@ -29,20 +29,20 @@ data "archive_file" "frontend_app_code" {
   type        = "zip"
   source_dir  = "FrontendCode"
   output_path = "Temp/frontendcode.zip"
-  excludes    = ["build", "node_modules", ".env.production"]
+  excludes    = ["build", "node_modules", ".env"]
 }
 
 resource "null_resource" "frontend_publish" {
   provisioner "local-exec" {
     command = <<-EOT
     cd FrontendCode
-    New-Item -Path .env.production -force
-    Add-Content -Path .env.production -Value "REACT_APP_redirectUri=https://${azurerm_windows_web_app.this.default_hostname}"
-    Add-Content -Path .env.production -Value "REACT_APP_clientID=${azuread_application.frontendapp.application_id}"
-    Add-Content -Path .env.production -Value "REACT_APP_TenantID=${var.AzureADTenantID}"
-    Add-Content -Path .env.production -Value "REACT_APP_APIMName=${azurerm_api_management.this.gateway_url}"
-    Add-Content -Path .env.production -Value "REACT_APP_APIName=${azurerm_api_management_api.this.name}"
-    Add-Content -Path .env.production -Value "REACT_APP_APICreate=${azurerm_api_management_api_operation.create.url_template}"
+    New-Item -Path .env -force
+    Add-Content -Path .env -Value "REACT_APP_redirectUri=https://${azurerm_windows_web_app.this.default_hostname}"
+    Add-Content -Path .env -Value "REACT_APP_clientID=${azuread_application.frontendapp.application_id}"
+    Add-Content -Path .env -Value "REACT_APP_TenantID=${var.AzureADTenantID}"
+    Add-Content -Path .env -Value "REACT_APP_APIMName=${azurerm_api_management.this.gateway_url}"
+    Add-Content -Path .env -Value "REACT_APP_APIName=${azurerm_api_management_api.this.name}"
+    Add-Content -Path .env -Value "REACT_APP_APICreate=${azurerm_api_management_api_operation.create.url_template}"
 
 
     npm run build
