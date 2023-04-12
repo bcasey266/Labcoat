@@ -98,7 +98,28 @@ resource "azurerm_windows_function_app" "this" {
       powershell_core_version = "7.2"
     }
 
-    dynamic "ip_restriction" {
+    ip_restriction {
+      action     = "Allow"
+      name       = "Gjon"
+      priority   = 1
+      ip_address = "${var.AdminIPs[0]}/32"
+    }
+
+    ip_restriction {
+      action     = "Allow"
+      name       = "Brandon"
+      priority   = 2
+      ip_address = "${var.AdminIPs[1]}/32"
+    }
+
+    ip_restriction {
+      action      = "Allow"
+      name        = "AzureCloud"
+      priority    = 3
+      service_tag = "AzureCloud"
+    }
+
+    /* dynamic "ip_restriction" {
       for_each = var.AdminIPs
       content {
         action     = "Allow"
@@ -106,7 +127,8 @@ resource "azurerm_windows_function_app" "this" {
         priority   = ip_restriction.key + 1
         ip_address = "${ip_restriction.value}/32"
       }
-    }
+    } */
+
     cors {
       allowed_origins = ["http://localhost:3000", "https://${azurerm_windows_web_app.this.default_hostname}"]
     }
