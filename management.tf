@@ -1,9 +1,6 @@
-data "http" "myip" {
-  url = "https://ipv4.icanhazip.com"
-}
+data "azurerm_client_config" "current" {}
 
-data "azurerm_client_config" "current" {
-}
+data "azuread_client_config" "current" {}
 
 resource "azurerm_resource_group" "this" {
   name     = var.ResourceGroupName
@@ -23,7 +20,7 @@ resource "azurerm_key_vault" "this" {
   network_acls {
     bypass         = "AzureServices"
     default_action = "Deny"
-    ip_rules       = [chomp(data.http.myip.response_body)]
+    ip_rules       = var.AdminIPs
   }
 }
 
@@ -35,7 +32,7 @@ resource "azurerm_storage_account" "this" {
   account_tier             = "Standard"
   network_rules {
     default_action = "Deny"
-    ip_rules       = [chomp(data.http.myip.response_body)]
+    ip_rules       = var.AdminIPs
     bypass         = ["Logging", "Metrics", "AzureServices"]
   }
 

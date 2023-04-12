@@ -123,7 +123,7 @@ const WebForm = () => {
           let accessToken = accessTokenResponse.idToken;
           console.log(accessTokenResponse)
 
-          const response = await fetch('https://apim-sandboxmgmt-prod.azure-api.net/sandbox/create', {
+          const response = await fetch('https://' + process.env.REACT_APP_APIMName + '/' + process.env.REACT_APP_APIName + '/' + process.env.REACT_APP_APICreate, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
