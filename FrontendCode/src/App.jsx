@@ -231,7 +231,7 @@ const WebForm = () => {
               <InputGroup>
                 <Input
                   type="string"
-                  placeholder="Boss.Doe@company.com"
+                  placeholder="Nick.Fury@shield.com"
                   value={ManagerEmail}
                   onChange={(e) => setManagerEmail(e.target.value)}
                 />
@@ -246,7 +246,7 @@ const WebForm = () => {
                 </InputLeftElement>
                 <Input
                   type="number"
-                  placeholder="Budget"
+                  placeholder="250"
                   value={Budget}
                   onChange={(e) => setBudget(e.target.value)}
                 />
