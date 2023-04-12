@@ -17,7 +17,6 @@ resource "azurerm_api_management_backend" "this" {
   api_management_name = azurerm_api_management.this.name
   protocol            = "http"
   url                 = "https://${azurerm_windows_function_app.this.default_hostname}/api"
-  resource_id         = azurerm_windows_function_app.this.id
   credentials {
     header = {
       "x-functions-key" = data.azurerm_function_app_host_keys.deploykeys.default_function_key
@@ -95,7 +94,7 @@ resource "azurerm_api_management_api_operation" "create" {
   }
 }
 
-resource "azurerm_api_management_api_operation_policy" "example" {
+resource "azurerm_api_management_api_operation_policy" "create" {
   api_name            = azurerm_api_management_api.this.name
   api_management_name = azurerm_api_management_api.this.api_management_name
   resource_group_name = azurerm_api_management_api.this.resource_group_name
@@ -105,7 +104,7 @@ resource "azurerm_api_management_api_operation_policy" "example" {
 <policies>
     <inbound>
         <base />
-        <set-backend-service id="sandbox" backend-id="${azurerm_api_management_backend.this.name}" />
+        <set-backend-service backend-id="${azurerm_api_management_backend.this.name}" />
     </inbound>
     <backend>
         <base />
