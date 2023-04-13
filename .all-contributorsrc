@@ -3,7 +3,7 @@
     "README.md"
   ],
   "imageSize": 100,
-  "commit": false,
+  "commit": true,
   "commitConvention": "angular",
   "contributors": [
     {
@@ -13,6 +13,17 @@
       "profile": "https://github.com/bcasey266",
       "contributions": [
         "code"
+      ]
+    },
+    {
+      "login": "gjonn",
+      "name": "Gjon Gojcevic",
+      "avatar_url": "https://avatars.githubusercontent.com/u/7807870?v=4",
+      "profile": "http://gjon.dev",
+      "contributions": [
+        "code",
+        "design",
+        "ideas"
       ]
     }
   ],
