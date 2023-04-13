@@ -8,7 +8,7 @@ resource "azurerm_service_plan" "this" {
 }
 
 resource "azurerm_storage_share" "this" {
-  name                 = "sandboxmgmt"
+  name                 = var.FunctionAppName
   storage_account_name = azurerm_storage_account.this.name
   quota                = 50
 }
@@ -97,11 +97,40 @@ resource "azurerm_windows_function_app" "this" {
     application_stack {
       powershell_core_version = "7.2"
     }
+
     ip_restriction {
       action     = "Allow"
-      ip_address = "${chomp(data.http.myip.response_body)}/32"
-      name       = "Default Block"
+      name       = "Gjon"
       priority   = 1
+      ip_address = "${var.AdminIPs[0]}/32"
+    }
+
+    ip_restriction {
+      action     = "Allow"
+      name       = "Brandon"
+      priority   = 2
+      ip_address = "${var.AdminIPs[1]}/32"
+    }
+
+    ip_restriction {
+      action      = "Allow"
+      name        = "AzureCloud"
+      priority    = 3
+      service_tag = "AzureCloud"
+    }
+
+    /* dynamic "ip_restriction" {
+      for_each = var.AdminIPs
+      content {
+        action     = "Allow"
+        name       = ip_restriction.value
+        priority   = ip_restriction.key + 1
+        ip_address = "${ip_restriction.value}/32"
+      }
+    } */
+
+    cors {
+      allowed_origins = ["http://localhost:3000", "https://${azurerm_windows_web_app.this.default_hostname}"]
     }
   }
 }
@@ -114,16 +143,22 @@ data "archive_file" "function_app_code" {
 }
 
 locals {
-  publish_code_command = "az webapp deployment source config-zip --resource-group ${azurerm_resource_group.this.name} --name ${azurerm_windows_function_app.this.name} --src ${data.archive_file.function_app_code.output_path} --only-show-errors > temp/output.txt"
+  publish_backendcode_command = "az webapp deployment source config-zip --resource-group ${azurerm_resource_group.this.name} --name ${azurerm_windows_function_app.this.name} --src ${data.archive_file.function_app_code.output_path} --only-show-errors > temp/output.txt"
 }
 
 resource "null_resource" "function_app_publish" {
   provisioner "local-exec" {
-    command = local.publish_code_command
+    command = local.publish_backendcode_command
   }
-  depends_on = [local.publish_code_command]
+  depends_on = [local.publish_backendcode_command]
   triggers = {
-    input_json           = filemd5(data.archive_file.function_app_code.output_path)
-    publish_code_command = local.publish_code_command
+    input_json                  = filemd5(data.archive_file.function_app_code.output_path)
+    publish_backendcode_command = local.publish_backendcode_command
+    deploy_target               = azurerm_windows_function_app.this.id
   }
+}
+
+data "azurerm_function_app_host_keys" "deploykeys" {
+  name                = azurerm_windows_function_app.this.name
+  resource_group_name = azurerm_resource_group.this.name
 }

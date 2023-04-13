@@ -18,6 +18,7 @@ $QueueMessage = @{
     "FirstName"    = $Request.Body.FirstName
     "LastName"     = $Request.Body.LastName
     "Email"        = $Request.Body.Email
+    "ObjectID"     = $Request.Body.ObjectID
     "ManagerEmail" = $Request.Body.ManagerEmail
     "Budget"       = $Request.Body.Budget
     "Length"       = $Request.Body.Length
