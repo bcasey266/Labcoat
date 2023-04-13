@@ -20,7 +20,7 @@ This solution tries to find that middle ground. It provides an easy to use inter
 ## Contributors
 <!-- All Contributors Emoji Reference: https://allcontributors.org/docs/en/emoji-key -->
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-3-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
@@ -31,6 +31,7 @@ This solution tries to find that middle ground. It provides an easy to use inter
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/bcasey266"><img src="https://avatars.githubusercontent.com/u/11546229?v=4?s=100" width="100px;" alt="Brandon Casey"/><br /><sub><b>Brandon Casey</b></sub></a><br /><a href="https://github.com/bcasey266/ASAP/commits?author=bcasey266" title="Code">💻</a></td>
       <td align="center" valign="top" width="14.28%"><a href="http://gjon.dev"><img src="https://avatars.githubusercontent.com/u/7807870?v=4?s=100" width="100px;" alt="Gjon Gojcevic"/><br /><sub><b>Gjon Gojcevic</b></sub></a><br /><a href="https://github.com/bcasey266/ASAP/commits?author=gjonn" title="Code">💻</a> <a href="#design-gjonn" title="Design">🎨</a> <a href="#ideas-gjonn" title="Ideas, Planning, & Feedback">🤔</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/manutd9393"><img src="https://avatars.githubusercontent.com/u/72894675?v=4?s=100" width="100px;" alt="Haitham Alrubai"/><br /><sub><b>Haitham Alrubai</b></sub></a><br /><a href="#ideas-manutd9393" title="Ideas, Planning, & Feedback">🤔</a> <a href="https://github.com/bcasey266/ASAP/commits?author=manutd9393" title="Code">💻</a> <a href="#infra-manutd9393" title="Infrastructure (Hosting, Build-Tools, etc)">🚇</a></td>
     </tr>
   </tbody>
 </table>
