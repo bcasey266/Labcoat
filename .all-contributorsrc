@@ -1,23 +1,25 @@
 {
-  "projectName": "ASAP",
-  "projectOwner": "bcasey266",
-  "repoType": "github",
-  "repoHost": "https://github.com",
-  "files": ["README.md"],
+  "files": [
+    "README.md"
+  ],
   "imageSize": 100,
   "commit": true,
-  "contributorsPerLine": 7,
-  "contributorsSortAlphabetically": false,
-  "badgeTemplate": "[![All Contributors](https://img.shields.io/github/all-contributors/<%= projectOwner %>/<%= projectName %>?color=ee8449&style=flat-square)](#contributors)",
-  "contributorTemplate": "<a href=\"<%= contributor.profile %>\"><img src=\"<%= contributor.avatar_url %>\" width=\"<%= options.imageSize %>px;\" alt=\"\"/><br /><sub><b><%= contributor.name %></b></sub></a>",
-  "types": {
-    "custom": {
-      "symbol": "🔭",
-      "description": "A custom contribution type.",
-      "link": "[<%= symbol %>](<%= url %> \"<%= description %>\"),"
+  "commitConvention": "angular",
+  "contributors": [
+    {
+      "login": "bcasey266",
+      "name": "Brandon Casey",
+      "avatar_url": "https://avatars.githubusercontent.com/u/11546229?v=4",
+      "profile": "https://github.com/bcasey266",
+      "contributions": [
+        "code"
+      ]
     }
-  },
-  "linkToUsage": true,
+  ],
+  "contributorsPerLine": 7,
   "skipCi": true,
-  "contributors": []
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "projectName": "ASAP",
+  "projectOwner": "bcasey266"
 }
