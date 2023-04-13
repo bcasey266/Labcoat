@@ -296,7 +296,6 @@ const TableModal = ({ isOpen, onClose }) => {
                                   icon={<RepeatIcon />}
                                   size="sm"
                                   onClick={() => handleResetClick(item)}
-                                  isDisabled
                                 />
                               </Tooltip>
                             )}
@@ -361,15 +360,15 @@ const TableModal = ({ isOpen, onClose }) => {
         actionName="Delete"
         onAction={() => handleDeleteSandbox(selectedSandbox)}
         title="Delete Sandbox"
-        message={`Are you sure you want to delete Sandbox: ${selectedSandbox?.SandboxName}?`}
+        message={`Are you sure you want to delete ${selectedSandbox?.SandboxName}?`}
       />
       <AlertDialogWithActions
         isOpen={isResetOpen}
         onClose={handleResetConfirmClose}
-        actionName="Delete"
+        actionName="Reset"
         onAction={() => handleResetSandbox(selectedSandbox)}
         title="Reset Sandbox"
-        message={`Are you sure you want to reset Sandbox: ${selectedSandbox?.SandboxName}?`}
+        message={`Are you sure you want to reset ${selectedSandbox?.SandboxName}?`}
       />
     </>
   );
