@@ -25,6 +25,17 @@
         "design",
         "ideas"
       ]
+    },
+    {
+      "login": "manutd9393",
+      "name": "Haitham Alrubai",
+      "avatar_url": "https://avatars.githubusercontent.com/u/72894675?v=4",
+      "profile": "https://github.com/manutd9393",
+      "contributions": [
+        "ideas",
+        "code",
+        "infra"
+      ]
     }
   ],
   "contributorsPerLine": 7,
