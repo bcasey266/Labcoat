@@ -1,12 +1,27 @@
-# ASAP
+# ASAP - Azure Sandbox Automation Platform
+
+## Overview
+### Mission
+Provide an open environment for users to learn while maintaining cost and security
+
+### Description
+Sandbox environments within Cloud provide a safe place for users to learn new technologies or perform early Proof of Concepts (PoC). However, sandboxes can pose a risk to organizations if the sandboxes are not properly managed and become ways to bypass Production organizational standards.
+
+It is a balancing act that needs to be found – too restrictive and users will create their own personal cloud subscriptions where the organization loses all control, whereas too lax and the organization could rack up large cloud spend bills or risk data exposure.
+
+This solution tries to find that middle ground. It provides an easy to use interface for users to create Sandboxes without jumping through multiple hurdles, which will encourage use. Cloud and Infrastructure Teams do not need to create and manage Sandboxes reducing their workload. Finally, security teams can be satisfied their requirements are being met with the automated deletions of environments preventing users from using it for Production workloads and logging and monitoring is still in place and enforced.
+
+### Goals
+- Self-Service
+- End-To-End Automated
+- Cost Controlled
+- Time-Bound
+
+## Contributors
+<!-- All Contributors Emoji Reference: https://allcontributors.org/docs/en/emoji-key -->
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
 [![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
- Azure Sandbox Automated Platform
-
-[![All Contributors](https://img.shields.io/github/all-contributors/bcasey266/ASAP?color=ee8449&style=flat-square)](#contributors)
-
-## Contributors
 
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
