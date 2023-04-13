@@ -269,9 +269,9 @@ const WebForm = () => {
               <FormLabel>Length</FormLabel>
               <RadioGroup onChange={setLength} value={Length}>
                 <Stack direction="row">
-                  <Radio value="1">1</Radio>
-                  <Radio value="2">2</Radio>
-                  <Radio value="3">3</Radio>
+                  <Radio value="1">30 Days</Radio>
+                  <Radio value="2">60 Days</Radio>
+                  <Radio value="3">90 Days</Radio>
                 </Stack>
               </RadioGroup>
             </FormControl>
