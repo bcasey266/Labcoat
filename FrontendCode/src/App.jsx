@@ -32,7 +32,7 @@ import {
   MenuItem,
   MenuDivider,
 } from '@chakra-ui/react';
-import { FaDollarSign, FaUser, FaHamburger, FaDoorOpen, FaVectorSquare } from 'react-icons/fa';
+import { FaDollarSign, FaUser, FaBars, FaDoorOpen, FaVectorSquare } from 'react-icons/fa';
 
 import { AuthenticatedTemplate, UnauthenticatedTemplate, useMsal, useMsalAuthentication } from '@azure/msal-react';
 
@@ -206,7 +206,7 @@ const WebForm = () => {
             <MenuButton
               as={IconButton}
               aria-label='Options'
-              icon={<FaHamburger />}
+              icon={<FaBars />}
               variant='outline'
             />
             <MenuList>
