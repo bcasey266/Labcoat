@@ -32,11 +32,13 @@ import {
   MenuItem,
   MenuDivider,
 } from '@chakra-ui/react';
-import { FaDollarSign, FaUser, FaHamburger, FaDoorOpen, FaVectorSquare } from 'react-icons/fa';
+import { FaDollarSign, FaUser, FaBars, FaDoorOpen, FaVectorSquare } from 'react-icons/fa';
 
 import { AuthenticatedTemplate, UnauthenticatedTemplate, useMsal, useMsalAuthentication } from '@azure/msal-react';
 
 import './App.css';
+import './components/TableModal.js'
+import TableModal from './components/TableModal.js';
 /**
 * If a user is authenticated the ProfileContent component above is rendered. Otherwise a message indicating a user is not authenticated is rendered.
 */
@@ -86,6 +88,10 @@ const WebForm = () => {
     setIsModalOpen(false);
   };
 
+  const [isSandboxModalOpen, setIsSandboxModalOpen] = useState(false);
+  const onSandboxClose = () => setIsSandboxModalOpen(false);
+  const onSandboxOpen = () => setIsSandboxModalOpen(true);
+
   useEffect(() => {
     if (Budget !== '' && Length !== '') {
       setIsValid(true);
@@ -123,7 +129,7 @@ const WebForm = () => {
           let accessToken = accessTokenResponse.idToken;
           console.log(accessTokenResponse)
 
-          const response = await fetch('https://apim-sandboxmgmt-prod.azure-api.net/sandbox/create', {
+          const response = await fetch(process.env.REACT_APP_APIMName + '/' + process.env.REACT_APP_APIName + process.env.REACT_APP_APICreate, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -200,7 +206,7 @@ const WebForm = () => {
             <MenuButton
               as={IconButton}
               aria-label='Options'
-              icon={<FaHamburger />}
+              icon={<FaBars />}
               variant='outline'
             />
             <MenuList>
@@ -208,9 +214,10 @@ const WebForm = () => {
                 {accounts[0].name}
               </MenuItem>
               <MenuDivider />
-              <MenuItem icon={<FaVectorSquare />} isDisabled='true'>
+              <MenuItem icon={<FaVectorSquare />} onClick={onSandboxOpen}>
                 My Sandboxes
               </MenuItem>
+              <TableModal isOpen={isSandboxModalOpen} onClose={onSandboxClose} />
               <MenuItem icon={<FaDoorOpen />} onClick={() => instance.logoutRedirect()}>
                 Sign Out
               </MenuItem>
@@ -224,7 +231,7 @@ const WebForm = () => {
               <InputGroup>
                 <Input
                   type="string"
-                  placeholder="Boss.Doe@company.com"
+                  placeholder="Nick.Fury@shield.com"
                   value={ManagerEmail}
                   onChange={(e) => setManagerEmail(e.target.value)}
                 />
@@ -239,7 +246,7 @@ const WebForm = () => {
                 </InputLeftElement>
                 <Input
                   type="number"
-                  placeholder="Budget"
+                  placeholder="250"
                   value={Budget}
                   onChange={(e) => setBudget(e.target.value)}
                 />
@@ -262,9 +269,9 @@ const WebForm = () => {
               <FormLabel>Length</FormLabel>
               <RadioGroup onChange={setLength} value={Length}>
                 <Stack direction="row">
-                  <Radio value="1">1</Radio>
-                  <Radio value="2">2</Radio>
-                  <Radio value="3">3</Radio>
+                  <Radio value="1">30 Days</Radio>
+                  <Radio value="2">60 Days</Radio>
+                  <Radio value="3">90 Days</Radio>
                 </Stack>
               </RadioGroup>
             </FormControl>

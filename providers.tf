@@ -16,5 +16,5 @@ provider "azurerm" {
 }
 
 provider "azuread" {
-  tenant_id = var.tenant_id
+  tenant_id = var.AzureADTenantID
 }
