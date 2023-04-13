@@ -79,7 +79,6 @@ $SandboxTable = (Get-AzStorageTable -Name $env:StorageTableSandbox -Context $Sto
 #ADDING NEW ROW TO TABLE
 $enddate = (Get-Date).AddDays([int]$Length).ToString("yyyy-MM-dd") 
 Add-AzTableRow -Table $SandboxTable -PartitionKey "Sandbox" -RowKey $SandboxName -Property @{
-    "SandboxName"  = $SandboxName
     "FirstName"    = $FirstName
     "LastName"     = $LastName
     "User"         = $Email

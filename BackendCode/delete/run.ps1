@@ -20,7 +20,7 @@ Set-AzContext -SubscriptionId $env:SandboxManagementSubscription | Out-Null
 $StorageAccount = Get-AzStorageAccount -ResourceGroupName $env:ResourceGroupName -Name $env:StorageAccountName
 $SandboxTable = (Get-AzStorageTable -Name $env:StorageTableSandbox -Context $StorageAccount.Context).CloudTable
 
-$DeletedSandbox = Get-AzTableRow -table $SandboxTable -RowKey $($QueueItem.SandboxName)
+$DeletedSandbox = Get-AzTableRow -table $SandboxTable -ColumnName "RowKey" -Value $($QueueItem.SandboxName) -Operator Equal
 
 $DeletedSandbox.Status = "Deleted"
 $DeletedSandbox | Update-AzTableRow -Table $SandboxTable
