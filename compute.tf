@@ -28,11 +28,6 @@ resource "azurerm_storage_table" "sandboxtable" {
   storage_account_name = azurerm_storage_account.this.name
 }
 
-resource "azurerm_storage_table" "counter" {
-  name                 = "counter"
-  storage_account_name = azurerm_storage_account.this.name
-}
-
 resource "azurerm_windows_function_app" "this" {
   name                = var.FunctionAppName
   resource_group_name = azurerm_resource_group.this.name
@@ -76,7 +71,6 @@ resource "azurerm_windows_function_app" "this" {
     "StorageQueueNewSandbox"                   = azurerm_storage_queue.newsandbox.name
     "StorageQueueDeleteSandbox"                = azurerm_storage_queue.deletesandbox.name
     "StorageTableSandbox"                      = azurerm_storage_table.sandboxtable.name
-    "StorageTableCounter"                      = azurerm_storage_table.counter.name
     "SandboxManagementSubscription"            = split("/", azurerm_resource_group.this.id)[2]
     "SandboxSubscription"                      = var.SandboxSubID
     "ManagedIdentityClientID"                  = azurerm_user_assigned_identity.this.client_id

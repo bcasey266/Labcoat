@@ -39,3 +39,8 @@ resource "azurerm_role_assignment" "sandboxmgmtSandboxMG" {
   role_definition_name = "Owner"
   principal_id         = azurerm_user_assigned_identity.this.principal_id
 }
+
+resource "azuread_directory_role_assignment" "userread" {
+  role_id             = "88d8e3e3-8f55-4a1e-953a-9b9898b8876b"
+  principal_object_id = azurerm_user_assigned_identity.this.principal_id
+}
