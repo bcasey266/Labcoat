@@ -36,6 +36,17 @@
         "code",
         "infra"
       ]
+    },
+    {
+      "login": "AaronP3",
+      "name": "AaronP3",
+      "avatar_url": "https://avatars.githubusercontent.com/u/92662388?v=4",
+      "profile": "https://github.com/AaronP3",
+      "contributions": [
+        "ideas",
+        "code",
+        "infra"
+      ]
     }
   ],
   "contributorsPerLine": 7,
