@@ -94,3 +94,15 @@ variable "FrontendApp" {
   type        = string
   description = "Frontend Azure AD App Registration Name"
 }
+
+### logicapp.tf Variables
+variable "LogicAppName" {
+  type        = string
+  description = "Azure Logic App Name for ASAP"
+}
+
+variable "LogicAppLocation" {
+  type        = string
+  description = "The azure region to place resources in"
+  default     = "eastus2"
+}

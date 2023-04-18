@@ -27,3 +27,7 @@ APIMName = ""
 
 ## azuread.tf Variables
 FrontendApp = ""
+
+### logicapp.tf Variables
+LogicAppName     = ""
+LogicAppLocation = ""
