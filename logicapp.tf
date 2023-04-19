@@ -47,33 +47,33 @@ resource "azurerm_logic_app_workflow" "this" {
     type = "SystemAssigned"
   }
   parameters = {
-    "$connections" = jsonencode(
-      {
-        (azapi_resource.queueapiconnection.name) = {
-          connectionId   = azapi_resource.queueapiconnection.id
-          connectionName = azapi_resource.queueapiconnection.name
-          id             = jsondecode(azapi_resource.queueapiconnection.output).properties.api.id
-          connectionProperties = {
-            authentication = {
-              type = "ManagedServiceIdentity"
-            }
+    "$connections" = jsonencode({
+      (azapi_resource.queueapiconnection.name) = {
+        connectionId   = azapi_resource.queueapiconnection.id
+        connectionName = azapi_resource.queueapiconnection.name
+        id             = jsondecode(azapi_resource.queueapiconnection.output).properties.api.id
+        connectionProperties = {
+          authentication = {
+            type = "ManagedServiceIdentity"
           }
-        },
-        (azapi_resource.office365apiconnection.name) = {
-          connectionId   = azapi_resource.office365apiconnection.id
-          connectionName = azapi_resource.office365apiconnection.name
-          id             = jsondecode(azapi_resource.office365apiconnection.output).properties.api.id
         }
+      },
+      (azapi_resource.office365apiconnection.name) = {
+        connectionId   = azapi_resource.office365apiconnection.id
+        connectionName = azapi_resource.office365apiconnection.name
+        id             = jsondecode(azapi_resource.office365apiconnection.output).properties.api.id
       }
-    )
+    })
   }
   workflow_parameters = {
-    "$connections" = jsonencode(
-      {
-        defaultValue = {}
-        type         = "Object"
-      }
-    )
+    "$connections" = jsonencode({
+      defaultValue = {}
+      type         = "Object"
+    }),
+    "frontend" : jsonencode({
+      "defaultValue" : "https://${azurerm_windows_web_app.this.default_hostname}/",
+      "type" : "String"
+    })
   }
 }
 
@@ -92,79 +92,176 @@ resource "azurerm_logic_app_trigger_custom" "this" {
   name         = "queue-message"
   logic_app_id = azurerm_logic_app_workflow.this.id
 
-  body = <<BODY
-{
-                "inputs": {
-                    "host": {
-                        "connection": {
-                            "name": "@parameters('$connections')['${azapi_resource.queueapiconnection.name}']['connectionId']"
-                        }
-                    },
-                    "method": "get",
-                    "path": "/v2/storageAccounts/@{encodeURIComponent(encodeURIComponent('${azurerm_storage_account.this.name}'))}/queues/@{encodeURIComponent('${azurerm_storage_queue.logicappqueue.name}')}/message_trigger"
-                },
-                "recurrence": {
-                    "frequency": "Minute",
-                    "interval": 3
-                },
-                "splitOn": "@triggerBody()?['QueueMessagesList']?['QueueMessage']",
-                "type": "ApiConnection"
-}
-BODY
-
+  body = jsonencode({
+    "inputs" : {
+      "host" : {
+        "connection" : {
+          "name" : "@parameters('$connections')['${azapi_resource.queueapiconnection.name}']['connectionId']"
+        }
+      },
+      "method" : "get",
+      "path" : "/v2/storageAccounts/@{encodeURIComponent(encodeURIComponent('${azurerm_storage_account.this.name}'))}/queues/@{encodeURIComponent('${azurerm_storage_queue.logicappqueue.name}')}/message_trigger"
+    },
+    "recurrence" : {
+      "frequency" : "Minute",
+      "interval" : 3
+    },
+    "splitOn" : "@triggerBody()?['QueueMessagesList']?['QueueMessage']",
+    "type" : "ApiConnection"
+  })
 }
 
-resource "azurerm_logic_app_action_custom" "sendmail" {
+resource "azurerm_logic_app_action_custom" "ParseJSON" {
+  name         = "Parse_JSON"
+  logic_app_id = azurerm_logic_app_workflow.this.id
+
+  body = jsonencode({
+    "inputs" : {
+      "content" : "@triggerBody()?['MessageText']",
+      "schema" : {
+        "properties" : {
+          "Budget" : {
+            "type" : "string"
+          },
+          "CostCenter" : {
+            "type" : "string"
+          },
+          "Email" : {
+            "type" : "string"
+          },
+          "FirstName" : {
+            "type" : "string"
+          },
+          "LastName" : {
+            "type" : "string"
+          },
+          "Length" : {
+            "type" : "string"
+          },
+          "ManagerEmail" : {
+            "type" : "string"
+          },
+          "NotificationType" : {
+            "type" : "string"
+          },
+          "SandboxName" : {
+            "type" : "string"
+          },
+          "DeleteOn" : {
+            "type" : "string"
+          }
+        },
+        "type" : "object"
+      }
+    },
+    "runAfter" : {},
+    "type" : "ParseJson"
+  })
+}
+
+resource "azurerm_logic_app_action_custom" "bodyvariable" {
+  name         = "body"
+  logic_app_id = azurerm_logic_app_workflow.this.id
+
+  body = jsonencode({
+    "inputs" = {
+      "variables" = [
+        {
+          "name"  = "body",
+          "type"  = "string",
+          "value" = "${file("CommunicationCode/index.html")}"
+        }
+      ]
+    },
+    "runAfter" = {
+      "${azurerm_logic_app_action_custom.ParseJSON.name}" : [
+        "Succeeded"
+      ]
+    },
+    "type" = "InitializeVariable"
+  })
+}
+
+resource "azurerm_logic_app_action_custom" "switch" {
+  name         = "switch"
+  logic_app_id = azurerm_logic_app_workflow.this.id
+
+  body = jsonencode({
+    "cases" : {
+      "Case" : {
+        "actions" : {
+          "send-email" : {
+            "inputs" : {
+              "body" : {
+                "Body" : "<p>@{variables('${azurerm_logic_app_action_custom.bodyvariable.name}')}</p>",
+                "Subject" : "New Sandbox: @{body('${azurerm_logic_app_action_custom.ParseJSON.name}')?['SandboxName']}",
+                "To" : "@body('${azurerm_logic_app_action_custom.ParseJSON.name}')?['Email']",
+                "Importance" : "Normal"
+              },
+              "host" : {
+                "connection" : {
+                  "name" : "@parameters('$connections')['${azapi_resource.office365apiconnection.name}']['connectionId']"
+                }
+              },
+              "method" : "post",
+              "path" : "/v2/Mail"
+            },
+            "runAfter" : {},
+            "type" : "ApiConnection"
+          }
+        },
+        "case" : "New"
+      }
+    },
+    "default" : {
+      "actions" : {}
+    },
+    "expression" : "@body('${azurerm_logic_app_action_custom.ParseJSON.name}')?['NotificationType']",
+    "runAfter" : {
+      "${azurerm_logic_app_action_custom.bodyvariable.name}" : [
+        "Succeeded"
+      ]
+    },
+    "type" : "Switch"
+  })
+}
+
+/* resource "azurerm_logic_app_action_custom" "sendmail" {
   name         = "send-email"
   logic_app_id = azurerm_logic_app_workflow.this.id
 
-  body = <<BODY
-{
-    "inputs": {
-                    "body": {
-                        "Body": "<p>@{triggerBody()?['MessageText']}</p>",
-                        "Importance": "Normal",
-                        "Subject": "Test Email",
-                        "To": "brandon.casey@ahead.com"
-                    },
-                    "host": {
-                        "connection": {
-                            "name": "@parameters('$connections')['${azapi_resource.office365apiconnection.name}']['connectionId']"
-                        }
-                    },
-                    "method": "post",
-                    "path": "/v2/Mail"
-                },
-    "runAfter": {},
-    "type": "ApiConnection"
-}
-BODY
-}
+  body = jsonencode({
+
+})
+} */
+
+
 
 resource "azurerm_logic_app_action_custom" "deletemessage" {
   name         = "delete-message"
   logic_app_id = azurerm_logic_app_workflow.this.id
 
-  body = <<BODY
-{
-    "inputs": {
-                    "host": {
-                        "connection": {
-                            "name": "@parameters('$connections')['${azapi_resource.queueapiconnection.name}']['connectionId']"
-                        }
-                    },
-                    "method": "delete",
-                    "path": "/v2/storageAccounts/@{encodeURIComponent(encodeURIComponent('${azurerm_storage_account.this.name}'))}/queues/@{encodeURIComponent('${azurerm_storage_queue.logicappqueue.name}')}/messages/@{encodeURIComponent(triggerBody()?['MessageId'])}",
-                    "queries": {
-                        "popreceipt": "@triggerBody()?['PopReceipt']"
-                    }
-                },
-    "runAfter": {"${azurerm_logic_app_action_custom.sendmail.name}": [
-                        "Succeeded"
-                    ]},
-    "type": "ApiConnection"
-}
-BODY
+  body = jsonencode({
+    "inputs" : {
+      "host" : {
+        "connection" : {
+          "name" : "@parameters('$connections')['${azapi_resource.queueapiconnection.name}']['connectionId']"
+        }
+      },
+      "method" : "delete",
+      "path" : "/v2/storageAccounts/@{encodeURIComponent(encodeURIComponent('${azurerm_storage_account.this.name}'))}/queues/@{encodeURIComponent('${azurerm_storage_queue.logicappqueue.name}')}/messages/@{encodeURIComponent(triggerBody()?['MessageId'])}",
+
+      "queries" : {
+        "popreceipt" : "@triggerBody()?['PopReceipt']"
+      }
+    },
+    "runAfter" : {
+      "${azurerm_logic_app_action_custom.switch.name}" : [
+        "Succeeded"
+      ]
+    },
+    "type" : "ApiConnection"
+  })
 }
 
 output "Authorize" {
