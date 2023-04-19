@@ -218,7 +218,7 @@
                                   <td style="padding-right: 0px;padding-left: 0px;" align="center">
 
                                     <img align="center" border="0" src="@{parameters('frontend')}/logo512.png"
-                                      alt=" Calendar" title="Calendar"
+                                      alt="Sandbox Logo" title="Sandbox Logo"
                                       style="outline: none;text-decoration: none;-ms-interpolation-mode: bicubic;clear: both;display: inline-block !important;border: none;height: auto;float: none;width: 23%;max-width: 126.5px;"
                                       width="126.5" />
 
@@ -290,6 +290,31 @@
                                     style="font-size: 16px; line-height: 22.4px; font-family: Lato, sans-serif;">
                                     Your Azure sandbox has been created successfully </span></p>
                                 <p style="font-size: 14px; line-height: 140%;"> </p>
+                                <table style="font-family:arial,helvetica,sans-serif;" role="presentation"
+                                  cellpadding="0" cellspacing="0" width="100%" border="0">
+                                  <tbody>
+                                    <tr>
+                                      <td
+                                        style="overflow-wrap:break-word;word-break:break-word;padding:10px 0px;font-family:arial,helvetica,sans-serif;"
+                                        align="left">
+
+                                        <table height="0px" align="center" border="0" cellpadding="0" cellspacing="0"
+                                          width="100%"
+                                          style="border-collapse: collapse;table-layout: fixed;border-spacing: 0;mso-table-lspace: 0pt;mso-table-rspace: 0pt;vertical-align: top;border-top: 1px solid #5c5a5a;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%">
+                                          <tbody>
+                                            <tr style="vertical-align: top">
+                                              <td
+                                                style="word-break: break-word;border-collapse: collapse !important;vertical-align: top;font-size: 0px;line-height: 0px;mso-line-height-rule: exactly;-ms-text-size-adjust: 100%;-webkit-text-size-adjust: 100%">
+                                                <span>&#160;</span>
+                                              </td>
+                                            </tr>
+                                          </tbody>
+                                        </table>
+
+                                      </td>
+                                    </tr>
+                                  </tbody>
+                                </table>
                                 <p style="font-size: 14px; line-height: 140%;"> </p>
                                 <strong>Sandbox information:</strong>
                                 <p>Name: @{body('Parse_JSON')?['SandboxName']} </p>
@@ -361,8 +386,9 @@
 
                               <!--[if mso]><style>.v-button {background: transparent !important;}</style><![endif]-->
                               <div align="center">
-                                <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="https://portal.azure.com/" style="height:39px; v-text-anchor:middle; width:190px;" arcsize="10.5%"  stroke="f" fillcolor="#7db00e"><w:anchorlock/><center style="color:#FFFFFF;font-family:arial,helvetica,sans-serif;"><![endif]-->
-                                <a href="https://portal.azure.com/" target="_blank"
+                                <!--[if mso]><v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" xmlns:w="urn:schemas-microsoft-com:office:word" href="https://portal.azure.com/#@/resource/subscriptions/@{parameters('SandboxSubscription')}/resourceGroups/@{body('Parse_JSON')?['SandboxName']}" style="height:39px; v-text-anchor:middle; width:190px;" arcsize="10.5%"  stroke="f" fillcolor="#7db00e"><w:anchorlock/><center style="color:#FFFFFF;font-family:arial,helvetica,sans-serif;"><![endif]-->
+                                <a href="https://portal.azure.com/#@/resource/subscriptions/@{parameters('SandboxSubscription')}/resourceGroups/@{body('Parse_JSON')?['SandboxName']}"
+                                  target="_blank"
                                   style="box-sizing: border-box;display: inline-block;font-family:arial,helvetica,sans-serif;text-decoration: none;-webkit-text-size-adjust: none;text-align: center;color: #FFFFFF; background-color: #7db00e; border-radius: 4px;-webkit-border-radius: 4px; -moz-border-radius: 4px; width:auto; max-width:100%; overflow-wrap: break-word; word-break: break-word; word-wrap:break-word; mso-border-alt: none;font-size: 14px;">
                                   <span style="display:block;padding:10px 50px;line-height:120%;"><span
                                       style="font-size: 16px; line-height: 19.2px;">Sandbox</span></span>

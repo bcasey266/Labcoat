@@ -73,12 +73,16 @@ resource "azurerm_logic_app_workflow" "this" {
     "frontend" : jsonencode({
       "defaultValue" : "https://${azurerm_windows_web_app.this.default_hostname}/",
       "type" : "String"
+    }),
+    "SandboxSubscription" : jsonencode({
+      "defaultValue" : "${var.SandboxSubID}",
+      "type" : "String"
     })
   }
 }
 
-resource "azurerm_storage_queue" "logicappqueue" {
-  name                 = "logicappqueue"
+resource "azurerm_storage_queue" "notification" {
+  name                 = "sandboxnotification"
   storage_account_name = azurerm_storage_account.this.name
 }
 
@@ -100,11 +104,11 @@ resource "azurerm_logic_app_trigger_custom" "this" {
         }
       },
       "method" : "get",
-      "path" : "/v2/storageAccounts/@{encodeURIComponent(encodeURIComponent('${azurerm_storage_account.this.name}'))}/queues/@{encodeURIComponent('${azurerm_storage_queue.logicappqueue.name}')}/message_trigger"
+      "path" : "/v2/storageAccounts/@{encodeURIComponent(encodeURIComponent('${azurerm_storage_account.this.name}'))}/queues/@{encodeURIComponent('${azurerm_storage_queue.notification.name}')}/message_trigger"
     },
     "recurrence" : {
       "frequency" : "Minute",
-      "interval" : 3
+      "interval" : 2
     },
     "splitOn" : "@triggerBody()?['QueueMessagesList']?['QueueMessage']",
     "type" : "ApiConnection"
@@ -149,7 +153,17 @@ resource "azurerm_logic_app_action_custom" "ParseJSON" {
           },
           "DeleteOn" : {
             "type" : "string"
-          }
+          },
+          "DeletionReason" : {
+            "type" : "string"
+          },
+          "CurrentCost" : {
+            "type" : "string"
+          },
+          "DaysLeft" : {
+            "type" : "string"
+          },
+
         },
         "type" : "object"
       }
@@ -159,22 +173,68 @@ resource "azurerm_logic_app_action_custom" "ParseJSON" {
   })
 }
 
-resource "azurerm_logic_app_action_custom" "bodyvariable" {
-  name         = "body"
+resource "azurerm_logic_app_action_custom" "newsandboxvariable" {
+  name         = "newsandboxvariable"
   logic_app_id = azurerm_logic_app_workflow.this.id
 
   body = jsonencode({
     "inputs" = {
       "variables" = [
         {
-          "name"  = "body",
+          "name"  = "newsandboxvariable",
           "type"  = "string",
-          "value" = "${file("CommunicationCode/index.html")}"
+          "value" = "${file("CommunicationCode/new.html")}"
         }
       ]
     },
     "runAfter" = {
       "${azurerm_logic_app_action_custom.ParseJSON.name}" : [
+        "Succeeded"
+      ]
+    },
+    "type" = "InitializeVariable"
+  })
+}
+
+resource "azurerm_logic_app_action_custom" "deletesandboxvariable" {
+  name         = "deletesandboxvariable"
+  logic_app_id = azurerm_logic_app_workflow.this.id
+
+  body = jsonencode({
+    "inputs" = {
+      "variables" = [
+        {
+          "name"  = "deletesandboxvariable",
+          "type"  = "string",
+          "value" = "${file("CommunicationCode/delete.html")}"
+        }
+      ]
+    },
+    "runAfter" = {
+      "${azurerm_logic_app_action_custom.newsandboxvariable.name}" : [
+        "Succeeded"
+      ]
+    },
+    "type" = "InitializeVariable"
+  })
+}
+
+resource "azurerm_logic_app_action_custom" "statussandboxvariable" {
+  name         = "statussandboxvariable"
+  logic_app_id = azurerm_logic_app_workflow.this.id
+
+  body = jsonencode({
+    "inputs" = {
+      "variables" = [
+        {
+          "name"  = "statussandboxvariable",
+          "type"  = "string",
+          "value" = "${file("CommunicationCode/status.html")}"
+        }
+      ]
+    },
+    "runAfter" = {
+      "${azurerm_logic_app_action_custom.deletesandboxvariable.name}" : [
         "Succeeded"
       ]
     },
@@ -188,12 +248,12 @@ resource "azurerm_logic_app_action_custom" "switch" {
 
   body = jsonencode({
     "cases" : {
-      "Case" : {
+      "New" : {
         "actions" : {
-          "send-email" : {
+          "send-new-email" : {
             "inputs" : {
               "body" : {
-                "Body" : "<p>@{variables('${azurerm_logic_app_action_custom.bodyvariable.name}')}</p>",
+                "Body" : "<p>@{variables('${azurerm_logic_app_action_custom.newsandboxvariable.name}')}</p>",
                 "Subject" : "New Sandbox: @{body('${azurerm_logic_app_action_custom.ParseJSON.name}')?['SandboxName']}",
                 "To" : "@body('${azurerm_logic_app_action_custom.ParseJSON.name}')?['Email']",
                 "Importance" : "Normal"
@@ -211,6 +271,54 @@ resource "azurerm_logic_app_action_custom" "switch" {
           }
         },
         "case" : "New"
+      },
+      "Delete" : {
+        "actions" : {
+          "send-delete-email" : {
+            "inputs" : {
+              "body" : {
+                "Body" : "<p>@{variables('${azurerm_logic_app_action_custom.deletesandboxvariable.name}')}</p>",
+                "Subject" : "Sandbox Deleted: @{body('${azurerm_logic_app_action_custom.ParseJSON.name}')?['SandboxName']}",
+                "To" : "@body('${azurerm_logic_app_action_custom.ParseJSON.name}')?['Email']",
+                "Importance" : "Normal"
+              },
+              "host" : {
+                "connection" : {
+                  "name" : "@parameters('$connections')['${azapi_resource.office365apiconnection.name}']['connectionId']"
+                }
+              },
+              "method" : "post",
+              "path" : "/v2/Mail"
+            },
+            "runAfter" : {},
+            "type" : "ApiConnection"
+          }
+        },
+        "case" : "Delete"
+      },
+      "Status" : {
+        "actions" : {
+          "send-status-email" : {
+            "inputs" : {
+              "body" : {
+                "Body" : "<p>@{variables('${azurerm_logic_app_action_custom.statussandboxvariable.name}')}</p>",
+                "Subject" : "Sandbox Status Report: @{body('${azurerm_logic_app_action_custom.ParseJSON.name}')?['SandboxName']}",
+                "To" : "@body('${azurerm_logic_app_action_custom.ParseJSON.name}')?['Email']",
+                "Importance" : "Normal"
+              },
+              "host" : {
+                "connection" : {
+                  "name" : "@parameters('$connections')['${azapi_resource.office365apiconnection.name}']['connectionId']"
+                }
+              },
+              "method" : "post",
+              "path" : "/v2/Mail"
+            },
+            "runAfter" : {},
+            "type" : "ApiConnection"
+          }
+        },
+        "case" : "Status"
       }
     },
     "default" : {
@@ -218,7 +326,7 @@ resource "azurerm_logic_app_action_custom" "switch" {
     },
     "expression" : "@body('${azurerm_logic_app_action_custom.ParseJSON.name}')?['NotificationType']",
     "runAfter" : {
-      "${azurerm_logic_app_action_custom.bodyvariable.name}" : [
+      "${azurerm_logic_app_action_custom.statussandboxvariable.name}" : [
         "Succeeded"
       ]
     },
@@ -249,7 +357,7 @@ resource "azurerm_logic_app_action_custom" "deletemessage" {
         }
       },
       "method" : "delete",
-      "path" : "/v2/storageAccounts/@{encodeURIComponent(encodeURIComponent('${azurerm_storage_account.this.name}'))}/queues/@{encodeURIComponent('${azurerm_storage_queue.logicappqueue.name}')}/messages/@{encodeURIComponent(triggerBody()?['MessageId'])}",
+      "path" : "/v2/storageAccounts/@{encodeURIComponent(encodeURIComponent('${azurerm_storage_account.this.name}'))}/queues/@{encodeURIComponent('${azurerm_storage_queue.notification.name}')}/messages/@{encodeURIComponent(triggerBody()?['MessageId'])}",
 
       "queries" : {
         "popreceipt" : "@triggerBody()?['PopReceipt']"
