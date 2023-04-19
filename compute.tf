@@ -70,6 +70,7 @@ resource "azurerm_windows_function_app" "this" {
     "StorageAccountName"                       = azurerm_storage_account.this.name
     "StorageQueueNewSandbox"                   = azurerm_storage_queue.newsandbox.name
     "StorageQueueDeleteSandbox"                = azurerm_storage_queue.deletesandbox.name
+    "StorageQueueNotifications"                = azurerm_storage_queue.notification.name
     "StorageTableSandbox"                      = azurerm_storage_table.sandboxtable.name
     "SandboxManagementSubscription"            = split("/", azurerm_resource_group.this.id)[2]
     "SandboxSubscription"                      = var.SandboxSubID

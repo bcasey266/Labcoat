@@ -34,6 +34,10 @@ resource "azurerm_storage_account" "this" {
     default_action = "Deny"
     ip_rules       = var.AdminIPs
     bypass         = ["Logging", "Metrics", "AzureServices"]
+    private_link_access {
+      endpoint_resource_id = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourcegroups/${azurerm_resource_group.this.name}/providers/Microsoft.Logic/workflows/*"
+      endpoint_tenant_id   = data.azurerm_client_config.current.tenant_id
+    }
   }
 
   enable_https_traffic_only       = true

@@ -8,6 +8,10 @@ terraform {
       source  = "hashicorp/azuread"
       version = "2.37.0"
     }
+    azapi = {
+      source  = "Azure/azapi"
+      version = "1.5.0"
+    }
   }
 }
 
@@ -17,4 +21,7 @@ provider "azurerm" {
 
 provider "azuread" {
   tenant_id = var.AzureADTenantID
+}
+
+provider "azapi" {
 }

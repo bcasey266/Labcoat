@@ -47,3 +47,7 @@ resource "azuread_application_pre_authorized" "frontendapp" {
   authorized_app_id     = azuread_application.frontendapp.application_id
   permission_ids        = [random_uuid.frontendapp.result]
 }
+
+output "APIAdminConsent" {
+  value = "Please consent to the Service Principal's API Permissions: https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/CallAnAPI/appId/${azuread_application.frontendapp.application_id}/isMSAApp~/false"
+}
