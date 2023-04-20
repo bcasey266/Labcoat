@@ -90,6 +90,17 @@ variable "APIMName" {
   description = "Azure APIM Name for ASAP"
 }
 
+variable "APIMPublisherName" {
+  type        = string
+  description = "The admin's name in charge of APIM"
+}
+
+variable "APIMPublisherEmail" {
+  type        = string
+  description = "The admin's email in charge of APIM"
+}
+
+### azuread.tf Variables
 variable "FrontendApp" {
   type        = string
   description = "Frontend Azure AD App Registration Name"

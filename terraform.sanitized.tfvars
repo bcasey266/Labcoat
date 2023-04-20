@@ -23,7 +23,9 @@ ServicePlanFEName = ""
 WebAppName        = ""
 
 ### APIM.tf Variables
-APIMName = ""
+APIMName           = ""
+APIMPublisherName  = ""
+APIMPublisherEmail = ""
 
 ## azuread.tf Variables
 FrontendApp = ""
