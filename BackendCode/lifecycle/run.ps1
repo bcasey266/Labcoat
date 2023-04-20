@@ -116,18 +116,17 @@ foreach ($Sandbox in $ActiveSandboxes) {
     Invoke-RestMethod -uri ""
 #>
 
-    # CANCEL THE SUBSCRIPTION     
+    # Submit the Sandbox for deletion
     if ($SandboxCost -ge $($Sandbox.Budget) -or [datetime]$($Sandbox.EndDate) -le (Get-Date)) {
         Set-AzContext -SubscriptionId $env:SandboxManagementSubscription | Out-Null
         $QueueMessage = @{
             "SandboxName" = $Sandbox.Rowkey
         }  | ConvertTo-Json
 
+        # Add Message to Queue
         $EncodedMessage = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($QueueMessage))
-
-        #Add Message to Queue
         $StorageQueue = Get-AzStorageQueue -Name $env:StorageQueueDeleteSandbox -Context $StorageAccount.Context
-        $StorageQueue.QueueClient.SendMessageAsync($EncodedMessage)
+        $StorageQueue.QueueClient.SendMessageAsync($EncodedMessage) | Out-Null
     }
 } 
 
