@@ -23,6 +23,11 @@ resource "azurerm_storage_queue" "deletesandbox" {
   storage_account_name = azurerm_storage_account.this.name
 }
 
+resource "azurerm_storage_queue" "resetsandbox" {
+  name                 = "resetsandbox"
+  storage_account_name = azurerm_storage_account.this.name
+}
+
 resource "azurerm_storage_table" "sandboxtable" {
   name                 = "sandboxtable"
   storage_account_name = azurerm_storage_account.this.name
@@ -70,6 +75,7 @@ resource "azurerm_windows_function_app" "this" {
     "StorageAccountName"                       = azurerm_storage_account.this.name
     "StorageQueueNewSandbox"                   = azurerm_storage_queue.newsandbox.name
     "StorageQueueDeleteSandbox"                = azurerm_storage_queue.deletesandbox.name
+    "StorageQueueResetSandbox"                 = azurerm_storage_queue.resetsandbox.name
     "StorageQueueNotifications"                = azurerm_storage_queue.notification.name
     "StorageTableSandbox"                      = azurerm_storage_table.sandboxtable.name
     "SandboxManagementSubscription"            = split("/", azurerm_resource_group.this.id)[2]

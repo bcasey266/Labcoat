@@ -45,7 +45,7 @@ try {
         "CostCenter"   = $QueueItem.CostCenter
     } | Out-Null
 
-    # Prep the Queue message while removing non-standard characters
+    # Prep the Queue message
     $QueueMessage = @{
         "NotificationType" = "New"
         "FirstName"        = $QueueItem.FirstName
