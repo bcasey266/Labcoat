@@ -127,7 +127,7 @@ foreach ($Sandbox in $ActiveSandboxes) {
             "FirstName"        = $Sandbox.FirstName
             "EndDate"          = $Sandbox.EndDate
             "DaysLeft"         = ($Sandbox.EndDate - $Date).Days
-            "CurrentCost"      = $SandboxCost
+            "CurrentCost"      = "{0:C0}" -f [int]$SandboxCost
         }  | ConvertTo-Json
 
         # Add Message to Queue
