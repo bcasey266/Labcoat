@@ -66,6 +66,24 @@ resource "azurerm_api_management_api_policy" "this" {
                 </claim>
             </required-claims>
         </validate-jwt>
+<set-variable name="x-request-user-id" value="@(context.Request.Headers.GetValueOrDefault("Authorization","").Split(' ')[1].AsJwt()?.Claims["oid"].FirstOrDefault())" />
+        <choose>
+            <when condition="@(context.Request.Method.Equals("POST"))">
+                <set-variable name="x-request-provided-id" value="@((string)context.Request.Body.As<JObject>(preserveContent: true).SelectToken("ObjectID"))" />
+            </when>
+            <when condition="@(context.Request.Method.Equals("GET"))">
+                <set-variable name="x-request-provided-id" value="@((string)context.Request.Url.Query.GetValueOrDefault("ObjectID"))" />
+            </when>
+        </choose>
+        <choose>
+            <when condition="@(context.Variables.GetValueOrDefault<string>("x-request-provided-id").Equals(context.Variables.GetValueOrDefault<string>("x-request-user-id")))" />
+            <otherwise>
+                <return-response>
+                    <set-status code="405" reason="Request Manipulated" />
+                </return-response>
+            </otherwise>
+        </choose>
+        <set-backend-service backend-id="${azurerm_api_management_backend.this.name}" />
         <base />
     </inbound>
     <backend>
@@ -95,27 +113,44 @@ resource "azurerm_api_management_api_operation" "create" {
   }
 }
 
-resource "azurerm_api_management_api_operation_policy" "create" {
+resource "azurerm_api_management_api_operation" "list" {
+  operation_id        = "list"
   api_name            = azurerm_api_management_api.this.name
   api_management_name = azurerm_api_management_api.this.api_management_name
   resource_group_name = azurerm_api_management_api.this.resource_group_name
-  operation_id        = azurerm_api_management_api_operation.create.operation_id
+  display_name        = "Get User Sandboxes"
+  method              = "GET"
+  url_template        = "/list"
 
-  xml_content = <<XML
-<policies>
-    <inbound>
-        <base />
-        <set-backend-service backend-id="${azurerm_api_management_backend.this.name}" />
-    </inbound>
-    <backend>
-        <base />
-    </backend>
-    <outbound>
-        <base />
-    </outbound>
-    <on-error>
-        <base />
-    </on-error>
-</policies>
-XML
+  response {
+    status_code = 200
+  }
+}
+
+resource "azurerm_api_management_api_operation" "delete" {
+  operation_id        = "delete"
+  api_name            = azurerm_api_management_api.this.name
+  api_management_name = azurerm_api_management_api.this.api_management_name
+  resource_group_name = azurerm_api_management_api.this.resource_group_name
+  display_name        = "Delete User Sandboxes"
+  method              = "POST"
+  url_template        = "/delete"
+
+  response {
+    status_code = 200
+  }
+}
+
+resource "azurerm_api_management_api_operation" "reset" {
+  operation_id        = "reset"
+  api_name            = azurerm_api_management_api.this.name
+  api_management_name = azurerm_api_management_api.this.api_management_name
+  resource_group_name = azurerm_api_management_api.this.resource_group_name
+  display_name        = "Reset User Sandboxes"
+  method              = "POST"
+  url_template        = "/reset"
+
+  response {
+    status_code = 200
+  }
 }

@@ -69,6 +69,9 @@ if (((Get-AzAccessToken).ExpiresOn) -lt (get-date)) {
 
 Set-AzContext -SubscriptionId $env:SandboxManagementSubscription | Out-Null
 
+# Retrieve Day of Week for Status Report Emails
+$Date = get-date
+
 # Setup REST Calls
 $headers = New-Object "System.Collections.Generic.Dictionary[[String],[String]]"
 $headers.Add("Content-Type", "application/json")
@@ -103,31 +106,34 @@ foreach ($Sandbox in $ActiveSandboxes) {
         }
     }
 
-    # TODO: build in cost notifications
-    <#
-    # LOGIC APP TO EMAIL USER / MANAGER - "AZURE2HELP"
-
-    $body = @{
-        "currentCost" = "$" + [math]::Round($currentCost.Sum, 2)
-        "SubOwner"    = $SubOwner
-        "SubId"       = $rowkey
-        "SubName"     = $subName
-    }
-    Invoke-RestMethod -uri ""
-#>
-
-    # CANCEL THE SUBSCRIPTION     
+    # Submit the Sandbox for deletion
     if ($SandboxCost -ge $($Sandbox.Budget) -or [datetime]$($Sandbox.EndDate) -le (Get-Date)) {
         Set-AzContext -SubscriptionId $env:SandboxManagementSubscription | Out-Null
         $QueueMessage = @{
             "SandboxName" = $Sandbox.Rowkey
         }  | ConvertTo-Json
 
+        # Add Message to Queue
         $EncodedMessage = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($QueueMessage))
-
-        #Add Message to Queue
         $StorageQueue = Get-AzStorageQueue -Name $env:StorageQueueDeleteSandbox -Context $StorageAccount.Context
-        $StorageQueue.QueueClient.SendMessageAsync($EncodedMessage)
+        $StorageQueue.QueueClient.SendMessageAsync($EncodedMessage) | Out-Null
+    } # If it's Friday, add a message to the Logic App queue to send a Sandbox Status Report email.
+    elseif ($($Date.DayOfWeek) -eq "Friday") {
+        Set-AzContext -SubscriptionId $env:SandboxManagementSubscription | Out-Null
+        $QueueMessage = @{
+            "NotificationType" = "Status"
+            "SandboxName"      = $Sandbox.Rowkey
+            "Email"            = $Sandbox.User
+            "FirstName"        = $Sandbox.FirstName
+            "EndDate"          = $Sandbox.EndDate
+            "DaysLeft"         = ($Sandbox.EndDate - $Date).Days
+            "CurrentCost"      = "{0:C0}" -f [int]$SandboxCost
+        }  | ConvertTo-Json
+
+        # Add Message to Queue
+        $EncodedMessage = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($QueueMessage))
+        $StorageQueue = Get-AzStorageQueue -Name $env:StorageQueueNotifications -Context $StorageAccount.Context
+        $StorageQueue.QueueClient.SendMessageAsync($EncodedMessage) | Out-Null
     }
 } 
 

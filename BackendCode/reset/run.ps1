@@ -4,7 +4,7 @@ using namespace System.Net
 param($Request)
 
 # Write to the Azure Functions log stream.
-Write-Host "Received request to delete a Sandbox:"
+Write-Host "Received request to reset a Sandbox:"
 $Request.Body
 
 # Authenticate, if needed, and set context to Management Subscription
@@ -35,13 +35,13 @@ try {
 
             #Add Message to Queue
             $EncodedMessage = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($QueueMessage))
-            $StorageQueue = Get-AzStorageQueue -Name $env:StorageQueueDeleteSandbox -Context $StorageAccount.Context
+            $StorageQueue = Get-AzStorageQueue -Name $env:StorageQueueResetSandbox -Context $StorageAccount.Context
             $StorageQueue.QueueClient.SendMessageAsync($EncodedMessage) | Out-Null
 
             # Return a Success Response
             Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
                     StatusCode = [HttpStatusCode]::OK
-                    Body       = "Sandbox Deletion Request added to queue"
+                    Body       = "Sandbox Reset Request added to queue"
                 })
         }
         else {
@@ -56,7 +56,7 @@ try {
         # Return a Failure Response due to Sandbox not being active
         Push-OutputBinding -Name Response -Value ([HttpResponseContext]@{
                 StatusCode = [HttpStatusCode]::BadRequest
-                Body       = "Sandbox is not active and so it cannot be deleted"
+                Body       = "Sandbox is not active and so it cannot be reset"
             })
     }
     

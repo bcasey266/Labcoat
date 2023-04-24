@@ -1,0 +1,11 @@
+﻿{
+  "bindings": [
+    {
+      "name": "QueueItem",
+      "type": "queueTrigger",
+      "direction": "in",
+      "queueName": "%StorageQueueDeleteSandbox%",
+      "connection": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING"
+    }
+  ]
+}
