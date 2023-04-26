@@ -120,8 +120,8 @@ const WebForm = () => {
       const accessTokenRequest = {
         scopes: ["User.Read"],
         account: accounts[0],
+        forceRefresh: true,
       };
-
       instance
         .acquireTokenSilent(accessTokenRequest)
         .then(async (accessTokenResponse) => {

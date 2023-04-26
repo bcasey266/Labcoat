@@ -1,5 +1,9 @@
 // TableModal.js
 import React, { useState, useEffect } from "react";
+import { useMsal, useIsAuthenticated } from "@azure/msal-react";
+import { InteractionRequiredAuthError } from "@azure/msal-browser";
+import { loginRequest } from "../authConfig";
+
 import {
   Button,
   Modal,
@@ -26,139 +30,17 @@ import {
 import { DeleteIcon, RepeatIcon, LinkIcon } from "@chakra-ui/icons";
 import AlertDialogWithActions from "./AlertDialog";
 
-const data = [
-  {
-    Status: "Active",
-    SandboxName: "Sandbox-Brandon-Casey-10",
-    User: "brandon.casey@ahead.com",
-    ManagerEmail: "asdfasdfas",
-    Budget: "456546",
-    ObjectID: "4799ae0e-87d1-4dfb-93ec-db7253a00da2",
-    CreationDate: "2023-04-11",
-    CostCenter: "45645",
-    EndDate: "2023-04-14",
-    LastName: "Casey",
-    FirstName: "Brandon",
-    PartitionKey: "Sandbox",
-    RowKey: "Sandbox-Brandon-Casey-10",
-    TableTimestamp: "2023-04-11T15:25:13.2833016-04:00",
-    Etag: "W/\"datetime'2023-04-11T19%3A25%3A13.2833016Z'\"",
-  },
-  {
-    Status: "Active",
-    SandboxName: "Sandbox-Brandon-Casey-11",
-    User: "brandon.casey@ahead.com",
-    ManagerEmail: "dfgddvfdf",
-    Budget: "456456",
-    ObjectID: "4799ae0e-87d1-4dfb-93ec-db7253a00da2",
-    CreationDate: "2023-04-11",
-    CostCenter: "456456",
-    EndDate: "2023-04-13",
-    LastName: "Casey",
-    FirstName: "Brandon",
-    PartitionKey: "Sandbox",
-    RowKey: "Sandbox-Brandon-Casey-11",
-    TableTimestamp: "2023-04-11T15:30:35.3330604-04:00",
-    Etag: "W/\"datetime'2023-04-11T19%3A30%3A35.3330604Z'\"",
-  },
-  {
-    Status: "Disabled",
-    Budget: "345345",
-    SandboxName: "Sandbox-Brandon-Casey-12",
-    ManagerEmail: "456345",
-    EndDate: "2023-04-14",
-    CostCenter: "345",
-    User: "brandon.casey@ahead.com",
-    ObjectID: "4799ae0e-87d1-4dfb-93ec-db7253a00da2",
-    FirstName: "Brandon",
-    LastName: "Casey",
-    CreationDate: "2023-04-11",
-    PartitionKey: "Sandbox",
-    RowKey: "Sandbox-Brandon-Casey-12",
-    TableTimestamp: "2023-04-11T15:53:34.9777816-04:00",
-    Etag: "W/\"datetime'2023-04-11T19%3A53%3A34.9777816Z'\"",
-  },
-  {
-    Status: "Deleting",
-    Budget: "345",
-    SandboxName: "Sandbox-Brandon-Casey-13",
-    ManagerEmail: "xcvxcvzxc",
-    EndDate: "2023-04-14",
-    CostCenter: "345",
-    User: "brandon.casey@ahead.com",
-    ObjectID: "4799ae0e-87d1-4dfb-93ec-db7253a00da2",
-    FirstName: "Brandon",
-    LastName: "Casey",
-    CreationDate: "2023-04-11",
-    PartitionKey: "Sandbox",
-    RowKey: "Sandbox-Brandon-Casey-13",
-    TableTimestamp: "2023-04-11T15:53:49.4545295-04:00",
-    Etag: "W/\"datetime'2023-04-11T19%3A53%3A49.4545295Z'\"",
-  },
-  {
-    Status: "Active",
-    Budget: "345345",
-    SandboxName: "Sandbox-Brandon-Casey-14",
-    ManagerEmail: "456345",
-    EndDate: "2023-04-14",
-    CostCenter: "345",
-    User: "brandon.casey@ahead.com",
-    ObjectID: "4799ae0e-87d1-4dfb-93ec-db7253a00da2",
-    FirstName: "Brandon",
-    LastName: "Casey",
-    CreationDate: "2023-04-11",
-    PartitionKey: "Sandbox",
-    RowKey: "Sandbox-Brandon-Casey-14",
-    TableTimestamp: "2023-04-11T15:53:58.635297-04:00",
-    Etag: "W/\"datetime'2023-04-11T19%3A53%3A58.635297Z'\"",
-  },
-  {
-    Status: "Active",
-    SandboxName: "Sandbox-Brandon-Casey-8",
-    User: "brandon.casey@ahead.com",
-    ManagerEmail: "cfvbsfgdvh",
-    Budget: "3245",
-    ObjectID: "4799ae0e-87d1-4dfb-93ec-db7253a00da2",
-    CreationDate: "2023-04-11",
-    CostCenter: "345",
-    EndDate: "2023-04-14",
-    LastName: "Casey",
-    FirstName: "Brandon",
-    PartitionKey: "Sandbox",
-    RowKey: "Sandbox-Brandon-Casey-8",
-    TableTimestamp: "2023-04-11T15:15:21.8050082-04:00",
-    Etag: "W/\"datetime'2023-04-11T19%3A15%3A21.8050082Z'\"",
-  },
-  {
-    Status: "Active",
-    SandboxName: "Sandbox-Brandon-Casey-9",
-    User: "brandon.casey@ahead.com",
-    ManagerEmail: "asdfasdfas",
-    Budget: "456546",
-    ObjectID: "4799ae0e-87d1-4dfb-93ec-db7253a00da2",
-    CreationDate: "2023-04-11",
-    CostCenter: "45645",
-    EndDate: "2023-04-14",
-    LastName: "Casey",
-    FirstName: "Brandon",
-    PartitionKey: "Sandbox",
-    RowKey: "Sandbox-Brandon-Casey-9",
-    TableTimestamp: "2023-04-11T15:24:56.9276971-04:00",
-    Etag: "W/\"datetime'2023-04-11T19%3A24%3A56.9276971Z'\"",
-  },
-];
-
 const fieldsToDisplay = [
-  "SandboxName",
+  "RowKey",
   "ManagerEmail",
   "Budget",
   "CostCenter",
-  "CreationDate",
   "EndDate",
   "Status",
 ];
 
 const TableModal = ({ isOpen, onClose }) => {
+  const { instance, accounts } = useMsal();
   const [isDeleteOpen, setisDeleteOpen] = React.useState(false);
   const [isResetOpen, setisResetOpen] = React.useState(false);
   const [selectedSandbox, setSelectedSandbox] = React.useState(null);
@@ -166,6 +48,9 @@ const TableModal = ({ isOpen, onClose }) => {
   const [showActiveOnly, setShowActiveOnly] = useState(
     localStorage.getItem("showActiveOnly") === "true" ? true : false
   );
+  const isAuthenticated = useIsAuthenticated();
+  const [sandboxes, setSandboxes] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   const handleDeleteClick = (sandbox) => {
     setSelectedSandbox(sandbox);
@@ -185,47 +70,189 @@ const TableModal = ({ isOpen, onClose }) => {
     setisResetOpen(false);
   };
 
-  const handleDeleteSandbox = () => {
-    console.log("Deleting sandbox:", selectedSandbox.SandboxName);
-    // Add delete logic here
-    handleDeleteConfirmClose();
-    toast({
-      title: "Submission Received",
-      description: `Sandbox ${selectedSandbox.SandboxName} has been queued for deletion.`,
-      status: "success",
-      duration: 5000,
-      isClosable: true,
-    });
+  const handleDeleteSandbox = async () => {
+    try {
+      await sandboxAction(selectedSandbox.RowKey, "delete");
+      handleDeleteConfirmClose();
+      toast({
+        title: "Submission Received",
+        description: `Sandbox ${selectedSandbox.RowKey} has been queued for deletion.`,
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
+    } catch (error) {
+      toast({
+        title: "Deletion Failed",
+        description: `Error deleting sandbox ${selectedSandbox.RowKey}. Please try again.`,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    }
   };
 
-  const handleResetSandbox = () => {
-    console.log("Resetting sandbox:", selectedSandbox.SandboxName);
-    // Add reset logic here
-    handleResetConfirmClose();
-    toast({
-      title: "Submission Received",
-      description: `Sandbox ${selectedSandbox.SandboxName} has been queued for reset.`,
-      status: "success",
-      duration: 5000,
-      isClosable: true,
-    });
+  const handleResetSandbox = async () => {
+    try {
+      await sandboxAction(selectedSandbox.RowKey, "reset");
+      toast({
+        title: "Submission Received",
+        description: `Sandbox ${selectedSandbox.RowKey} has been queued for reset.`,
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
+    } catch (error) {
+      toast({
+        title: "Deletion Failed",
+        description: `Error resetting sandbox ${selectedSandbox.RowKey}. Please try again.`,
+        status: "error",
+        duration: 5000,
+        isClosable: true,
+      });
+    }
   };
 
   const handleLink = (sandbox) => {
     setSelectedSandbox(sandbox);
-    const url = `https://portal.azure.com/#@aheadbrandoncasey.onmicrosoft.com/resource/subscriptions/4781d26e-b7b3-49ea-b5c4-5a001c9cf167/resourceGroups/${sandbox.SandboxName}/overview`;
+    const url = `https://portal.azure.com/#@aheadbrandoncasey.onmicrosoft.com/resource/subscriptions/4781d26e-b7b3-49ea-b5c4-5a001c9cf167/resourceGroups/${sandbox.RowKey}/overview`;
     window.open(url, "_blank");
   };
 
-  const headers = [...fieldsToDisplay, "Reset", "Delete", "Browse"];
+  const headers = [...fieldsToDisplay, "Reset", "Delete", "Browse"].map(
+    (header) => {
+      if (header === "RowKey") {
+        return "Sandbox Name";
+      } else if (header === "ManagerEmail") {
+        return "Manager Email";
+      } else if (header === "CostCenter") {
+        return "Cost Center";
+      } else if (header === "EndDate") {
+        return "End Date";
+      } else {
+        return header;
+      }
+    }
+  );
 
   const filteredData = showActiveOnly
-    ? data.filter((item) => item.Status === "Active")
-    : data;
+    ? sandboxes.filter((item) => item.Status === "Active")
+    : sandboxes;
 
   useEffect(() => {
     localStorage.setItem("showActiveOnly", showActiveOnly);
   }, [showActiveOnly]);
+
+  useEffect(() => {
+    if (isAuthenticated && isOpen) {
+      async function getSandboxes() {
+        try {
+          const accessToken = await instance.acquireTokenSilent({
+            ...loginRequest,
+            account: accounts[0],
+            forceRefresh: true,
+          });
+          const fetchedSanboxes = await fetchSandboxes(accessToken.idToken);
+          setSandboxes(fetchedSanboxes);
+          setLoading(false);
+        } catch (error) {
+          if (error instanceof InteractionRequiredAuthError) {
+            try {
+              await instance.acquireTokenRedirect(loginRequest);
+              getSandboxes();
+            } catch (error) {
+              console.error("Error acquiring token:", error);
+            }
+          } else {
+            console.error("Error fetching users:", error);
+          }
+        }
+      }
+      getSandboxes();
+    }
+  }, [instance, isAuthenticated, accounts, isOpen]);
+
+  async function fetchSandboxes(accessToken) {
+    const endpoint = `${process.env.REACT_APP_APIMName}/${process.env.REACT_APP_APIName}${process.env.REACT_APP_APIList}?ObjectID=${accounts[0].localAccountId}`;
+    const headers = new Headers();
+    headers.append("Authorization", `Bearer ${accessToken}`);
+    const response = await fetch(endpoint, { headers });
+    if (!response.ok) {
+      throw new Error(`Error fetching users: ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    if (!Array.isArray(data)) {
+      data = [data];
+    }
+
+    return data;
+  }
+
+  async function sandboxAction(sandboxName, action) {
+    try {
+      const accessToken = await instance.acquireTokenSilent({
+        ...loginRequest,
+        account: accounts[0],
+        forceRefresh: true,
+      });
+      const endpoint = `${process.env.REACT_APP_APIMName}/${process.env.REACT_APP_APIName}/${action}`;
+      const headers = new Headers();
+      headers.append("Authorization", `Bearer ${accessToken.idToken}`);
+      headers.append("Content-Type", "application/json");
+
+      console.log("Sandbox Name:", sandboxName);
+      console.log("Object ID:", accounts[0].localAccountId);
+
+      const requestBody = {
+        SandboxName: sandboxName,
+        ObjectID: accounts[0].localAccountId,
+      };
+
+      console.log("Request Body:", JSON.stringify(requestBody));
+      console.log("ID Token:", accessToken.idToken);
+
+      const requestOptions = {
+        method: "POST",
+        headers: headers,
+        body: JSON.stringify(requestBody),
+      };
+
+      return new Promise(async (resolve, reject) => {
+        try {
+          const response = await fetch(endpoint, requestOptions);
+          if (!response.ok) {
+            throw new Error(`Error ${action} sandbox: ${response.statusText}`);
+          }
+
+          const data = await response.text();
+          resolve(data);
+        } catch (error) {
+          if (error instanceof InteractionRequiredAuthError) {
+            try {
+              await instance.acquireTokenRedirect(loginRequest);
+              sandboxAction();
+            } catch (error) {
+              reject(new Error(`Error acquiring token`, error));
+            }
+          } else {
+            reject(new Error(`${action} failed: ${error}`));
+          }
+        }
+      });
+    } catch (error) {
+      if (error instanceof InteractionRequiredAuthError) {
+        try {
+          await instance.acquireTokenRedirect(loginRequest);
+          sandboxAction();
+        } catch (error) {
+          throw new Error(`Error acquiring token`, error);
+        }
+      } else {
+        throw new Error(`${action} failed: ${error}`);
+      }
+    }
+  }
 
   return (
     <>
@@ -234,7 +261,7 @@ const TableModal = ({ isOpen, onClose }) => {
           bg="blackAlpha.300"
           backdropFilter="blur(10px) hue-rotate(90deg)"
         />
-        <ModalContent maxWidth="90vw" width="auto">
+        <ModalContent maxWidth="90vw" minWidth="60vw" width="auto">
           <ModalHeader>My Sandboxes</ModalHeader>
           <ModalCloseButton />
           <ModalBody maxHeight="70vh">
@@ -244,107 +271,115 @@ const TableModal = ({ isOpen, onClose }) => {
               </Button>
             </Flex>
             <Box maxHeight="70vh" overflowY="auto">
-              <Table variant="simple">
-                <Thead>
-                  <Tr>
-                    {headers.map((header) => (
-                      <Th key={header}>{header}</Th>
-                    ))}
-                  </Tr>
-                </Thead>
-                <Tbody>
-                  {filteredData.map((item, index) => (
-                    <Tr key={index}>
-                      {fieldsToDisplay.map((field) => (
-                        <Td
-                          key={field}
-                          color={
-                            field === "Status"
-                              ? item[field] === "Active"
-                                ? "green.500"
-                                : item[field] === "Disabled"
-                                ? "red.500"
-                                : item[field] === "Deleting"
-                                ? "orange.500"
-                                : item[field] === "Resetting"
-                                ? "orange.500"
-                                : null
-                              : null
-                          }
-                        >
-                          {field === "Budget"
-                            ? new Intl.NumberFormat("en-US", {
-                                style: "currency",
-                                currency: "USD",
-                              }).format(item[field])
-                            : item[field]}
-                        </Td>
+              {!loading ? (
+                <Table variant="simple">
+                  <Thead>
+                    <Tr>
+                      {headers.map((header) => (
+                        <Th key={header}>{header}</Th>
                       ))}
-                      <Td>
-                        <Flex justifyContent="center">
-                          <Box>
-                            {item.Status === "Resetting" ? (
-                              <Spinner size="sm" />
-                            ) : (
-                              <Tooltip
-                                label="Reset Sandbox"
-                                aria-label="Reset Sandbox"
-                                openDelay={500}
-                              >
-                                <IconButton
-                                  aria-label="Reset Sandbox"
-                                  icon={<RepeatIcon />}
-                                  size="sm"
-                                  onClick={() => handleResetClick(item)}
-                                />
-                              </Tooltip>
-                            )}
-                          </Box>
-                        </Flex>
-                      </Td>
-                      <Td>
-                        <Flex justifyContent="center">
-                          <Box>
-                            {item.Status === "Deleting" ? (
-                              <Spinner size="sm" />
-                            ) : (
-                              <Tooltip
-                                label="Delete Sandbox"
-                                aria-label="Delete Sandbox"
-                                openDelay={500}
-                              >
-                                <IconButton
-                                  aria-label="Delete Sandbox"
-                                  icon={<DeleteIcon />}
-                                  size="sm"
-                                  onClick={() => handleDeleteClick(item)}
-                                  isDisabled={item.Status !== "Active"}
-                                />
-                              </Tooltip>
-                            )}
-                          </Box>
-                        </Flex>
-                      </Td>
-                      <Td>
-                        <Flex justifyContent="center">
-                          <Tooltip
-                            label="View Sandbox"
-                            aria-label="View Sandbox"
-                            openDelay={500}
-                          >
-                            <IconButton
-                              icon={<LinkIcon />}
-                              size="sm"
-                              onClick={() => handleLink(item)}
-                              isDisabled={item.Status !== "Active"}
-                            />
-                          </Tooltip>
-                        </Flex>
-                      </Td>
                     </Tr>
-                  ))}
-                </Tbody>
-              </Table>
+                  </Thead>
+                  <Tbody>
+                    {filteredData.map((item, index) => (
+                      <Tr key={index}>
+                        {fieldsToDisplay.map((field) => (
+                          <Td
+                            key={field}
+                            color={
+                              field === "Status"
+                                ? item[field] === "Active"
+                                  ? "green.500"
+                                  : item[field] === "Disabled"
+                                  ? "red.500"
+                                  : item[field] === "Deleting"
+                                  ? "orange.500"
+                                  : item[field] === "Resetting"
+                                  ? "orange.500"
+                                  : null
+                                : null
+                            }
+                          >
+                            {field === "Budget"
+                              ? new Intl.NumberFormat("en-US", {
+                                  style: "currency",
+                                  currency: "USD",
+                                }).format(item[field])
+                              : field === "RowKey"
+                              ? item["RowKey"]
+                              : item[field]}
+                          </Td>
+                        ))}
+                        <Td>
+                          <Flex justifyContent="center">
+                            <Box>
+                              {item.Status === "Resetting" ? (
+                                <Spinner size="sm" />
+                              ) : (
+                                <Tooltip
+                                  label="Reset Sandbox"
+                                  aria-label="Reset Sandbox"
+                                  openDelay={500}
+                                >
+                                  <IconButton
+                                    aria-label="Reset Sandbox"
+                                    icon={<RepeatIcon />}
+                                    size="sm"
+                                    onClick={() => handleResetClick(item)}
+                                  />
+                                </Tooltip>
+                              )}
+                            </Box>
+                          </Flex>
+                        </Td>
+                        <Td>
+                          <Flex justifyContent="center">
+                            <Box>
+                              {item.Status === "Deleting" ? (
+                                <Spinner size="sm" />
+                              ) : (
+                                <Tooltip
+                                  label="Delete Sandbox"
+                                  aria-label="Delete Sandbox"
+                                  openDelay={500}
+                                >
+                                  <IconButton
+                                    aria-label="Delete Sandbox"
+                                    icon={<DeleteIcon />}
+                                    size="sm"
+                                    onClick={() => handleDeleteClick(item)}
+                                    isDisabled={item.Status !== "Active"}
+                                  />
+                                </Tooltip>
+                              )}
+                            </Box>
+                          </Flex>
+                        </Td>
+                        <Td>
+                          <Flex justifyContent="center">
+                            <Tooltip
+                              label="View Sandbox"
+                              aria-label="View Sandbox"
+                              openDelay={500}
+                            >
+                              <IconButton
+                                icon={<LinkIcon />}
+                                size="sm"
+                                onClick={() => handleLink(item)}
+                                isDisabled={item.Status !== "Active"}
+                              />
+                            </Tooltip>
+                          </Flex>
+                        </Td>
+                      </Tr>
+                    ))}
+                  </Tbody>
+                </Table>
+              ) : (
+                <Flex justifyContent="center" alignItems="center" height="25vh">
+                  <Spinner />
+                </Flex>
+              )}
             </Box>
           </ModalBody>
           <ModalFooter>
@@ -360,7 +395,7 @@ const TableModal = ({ isOpen, onClose }) => {
         actionName="Delete"
         onAction={() => handleDeleteSandbox(selectedSandbox)}
         title="Delete Sandbox"
-        message={`Are you sure you want to delete ${selectedSandbox?.SandboxName}?`}
+        message={`Are you sure you want to delete ${selectedSandbox?.RowKey}?`}
       />
       <AlertDialogWithActions
         isOpen={isResetOpen}
@@ -368,7 +403,7 @@ const TableModal = ({ isOpen, onClose }) => {
         actionName="Reset"
         onAction={() => handleResetSandbox(selectedSandbox)}
         title="Reset Sandbox"
-        message={`Are you sure you want to reset ${selectedSandbox?.SandboxName}?`}
+        message={`Are you sure you want to reset ${selectedSandbox?.RowKey}?`}
       />
     </>
   );
