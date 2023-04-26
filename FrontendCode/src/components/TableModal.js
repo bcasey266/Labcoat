@@ -121,7 +121,7 @@ const TableModal = ({ isOpen, onClose }) => {
 
   const handleLink = (sandbox) => {
     setSelectedSandbox(sandbox);
-    const url = `https://portal.azure.com/#@aheadbrandoncasey.onmicrosoft.com/resource/subscriptions/4781d26e-b7b3-49ea-b5c4-5a001c9cf167/resourceGroups/${sandbox.RowKey}/overview`;
+    const url = `https://portal.azure.com/#@/resource/subscriptions/${process.env.REACT_APP_SandboxSubscription}/resourceGroups/${sandbox.RowKey}/overview`;
     window.open(url, "_blank");
   };
 
@@ -179,7 +179,7 @@ const TableModal = ({ isOpen, onClose }) => {
   }, [instance, isAuthenticated, accounts, isOpen]);
 
   async function fetchSandboxes(accessToken) {
-    const endpoint = `${process.env.REACT_APP_APIMName}/${process.env.REACT_APP_APIName}${process.env.REACT_APP_APIList}?ObjectID=${accounts[0].localAccountId}`;
+    const endpoint = `${process.env.REACT_APP_APIMName}/${process.env.REACT_APP_APIName}/${process.env.REACT_APP_APIList}?ObjectID=${accounts[0].localAccountId}`;
     const headers = new Headers();
     headers.append("Authorization", `Bearer ${accessToken}`);
     const response = await fetch(endpoint, { headers });
@@ -187,7 +187,7 @@ const TableModal = ({ isOpen, onClose }) => {
       throw new Error(`Error fetching users: ${response.statusText}`);
     }
 
-    const data = await response.json();
+    var data = await response.json();
     if (!Array.isArray(data)) {
       data = [data];
     }
@@ -296,24 +296,27 @@ const TableModal = ({ isOpen, onClose }) => {
                               field === "Status"
                                 ? item[field] === "Active"
                                   ? "green.500"
-                                  : item[field] === "Disabled"
-                                  ? "red.500"
-                                  : item[field] === "Deleting"
-                                  ? "orange.500"
-                                  : item[field] === "Resetting"
-                                  ? "orange.500"
-                                  : null
+                                  : item[field] === "Deleted"
+                                    ? "red.500"
+                                    : item[field] === "Creating"
+                                      ? "orange.500"
+                                      : item[field] === "Deleting"
+                                        ? "orange.500"
+                                        : item[field] === "Resetting"
+                                          ? "orange.500"
+                                          : null
                                 : null
                             }
                           >
                             {field === "Budget"
                               ? new Intl.NumberFormat("en-US", {
-                                  style: "currency",
-                                  currency: "USD",
-                                }).format(item[field])
+                                style: "currency",
+                                currency: "USD",
+                                maximumFractionDigits: 0,
+                              }).format(item[field])
                               : field === "RowKey"
-                              ? item["RowKey"]
-                              : item[field]}
+                                ? item["RowKey"]
+                                : item[field]}
                           </Td>
                         ))}
                         <Td>
@@ -332,6 +335,7 @@ const TableModal = ({ isOpen, onClose }) => {
                                     icon={<RepeatIcon />}
                                     size="sm"
                                     onClick={() => handleResetClick(item)}
+                                    isDisabled={item.Status !== "Active"}
                                   />
                                 </Tooltip>
                               )}

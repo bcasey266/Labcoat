@@ -30,7 +30,7 @@ try {
             
             # Prep the Queue message
             $QueueMessage = @{
-                "SandboxName" = $Sandbox.Rowkey
+                "SandboxName" = $SandboxInfo.Rowkey
             }  | ConvertTo-Json
 
             #Add Message to Queue
