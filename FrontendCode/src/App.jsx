@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect } from 'react';
 import {
   Heading,
   useToast,
@@ -33,31 +33,31 @@ import {
   MenuItem,
   MenuDivider,
   Spacer,
-} from "@chakra-ui/react";
+} from '@chakra-ui/react';
 import {
   FaDollarSign,
   FaUser,
   FaBars,
   FaDoorOpen,
   FaVectorSquare,
-} from "react-icons/fa";
+} from 'react-icons/fa';
 
 import {
   AuthenticatedTemplate,
   UnauthenticatedTemplate,
   useMsal,
   useMsalAuthentication,
-} from "@azure/msal-react";
+} from '@azure/msal-react';
 
-import "./App.css";
-import "./components/TableModal.js";
-import TableModal from "./components/TableModal.js";
+import './App.css';
+import './components/TableModal.js';
+import TableModal from './components/TableModal.js';
 /**
  * If a user is authenticated the ProfileContent component above is rendered. Otherwise a message indicating a user is not authenticated is rendered.
  */
 
 export default function App() {
-  const { login, result, error } = useMsalAuthentication("redirect");
+  const { login, result, error } = useMsalAuthentication('redirect');
 
   return (
     <div className='App'>
@@ -82,9 +82,9 @@ const WebForm = () => {
   const toast = useToast();
 
   var { instance, accounts } = useMsal();
-  const [ManagerEmail, setManagerEmail] = useState("");
-  const [Budget, setBudget] = useState("");
-  const [Length, setLength] = useState("");
+  const [ManagerEmail, setManagerEmail] = useState('');
+  const [Budget, setBudget] = useState('');
+  const [Length, setLength] = useState('');
   const [CostCenter, setCostCenter] = useState([]);
   const [isValid, setIsValid] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -104,7 +104,7 @@ const WebForm = () => {
   const onSandboxOpen = () => setIsSandboxModalOpen(true);
 
   useEffect(() => {
-    if (Budget !== "" && Length !== "") {
+    if (Budget !== '' && Length !== '') {
       setIsValid(true);
     } else {
       setIsValid(false);
@@ -117,8 +117,8 @@ const WebForm = () => {
     console.log(accounts[0]);
 
     const payload = {
-      FirstName: accounts[0].name.split(" ")[0],
-      LastName: accounts[0].name.split(" ")[1],
+      FirstName: accounts[0].name.split(' ')[0],
+      LastName: accounts[0].name.split(' ')[1],
       Email: accounts[0].username,
       ObjectID: accounts[0].localAccountId,
       ManagerEmail,
@@ -129,7 +129,7 @@ const WebForm = () => {
 
     try {
       const accessTokenRequest = {
-        scopes: ["User.Read"],
+        scopes: ['User.Read'],
         account: accounts[0],
         forceRefresh: true,
       };
@@ -142,14 +142,14 @@ const WebForm = () => {
 
           const response = await fetch(
             process.env.REACT_APP_APIMName +
-              "/" +
+              '/' +
               process.env.REACT_APP_APIName +
               process.env.REACT_APP_APICreate,
             {
-              method: "POST",
+              method: 'POST',
               headers: {
-                "Content-Type": "application/json",
-                Authorization: "Bearer " + accessToken,
+                'Content-Type': 'application/json',
+                Authorization: 'Bearer ' + accessToken,
               },
               body: JSON.stringify(payload),
             }
@@ -159,22 +159,22 @@ const WebForm = () => {
 
           if (response.ok) {
             toast({
-              title: "Submission successful",
-              description: "Your form has been submitted successfully.",
-              status: "success",
+              title: 'Submission successful',
+              description: 'Your form has been submitted successfully.',
+              status: 'success',
               duration: 3000,
               isClosable: true,
-              position: "top",
+              position: 'top',
             });
             setIsLoading(false);
           } else {
             toast({
-              title: "Submission failed",
-              description: "There was a problem submitting your form.",
-              status: "error",
+              title: 'Submission failed',
+              description: 'There was a problem submitting your form.',
+              status: 'error',
               duration: 3000,
               isClosable: true,
-              position: "top",
+              position: 'top',
             });
             setIsLoading(false);
           }
@@ -182,23 +182,23 @@ const WebForm = () => {
         .catch((error) => {
           // Handle error here
           toast({
-            title: "Submission failed",
-            description: "There was a problem submitting your form.",
-            status: "error",
+            title: 'Submission failed',
+            description: 'There was a problem submitting your form.',
+            status: 'error',
             duration: 3000,
             isClosable: true,
-            position: "top",
+            position: 'top',
           });
           setIsLoading(false);
         });
     } catch (error) {
       toast({
-        title: "Submission failed",
-        description: "There was a problem submitting your form. ",
-        status: "error",
+        title: 'Submission failed',
+        description: 'There was a problem submitting your form.',
+        status: 'error',
         duration: 3000,
         isClosable: true,
-        position: "top",
+        position: 'top',
       });
       setIsLoading(false);
     }

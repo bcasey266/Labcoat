@@ -8,4 +8,5 @@
         "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
     "prettier.jsxSingleQuote": true,
+    "prettier.singleQuote": true,
 }
