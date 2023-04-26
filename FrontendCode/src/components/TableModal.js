@@ -262,23 +262,23 @@ const TableModal = ({ isOpen, onClose }) => {
 
   return (
     <>
-      <Modal isOpen={isOpen} onClose={onClose} size="xl">
+      <Modal isOpen={isOpen} onClose={onClose} size='xl'>
         <ModalOverlay
-          bg="blackAlpha.300"
-          backdropFilter="blur(10px) hue-rotate(90deg)"
+          bg='blackAlpha.300'
+          backdropFilter='blur(10px) hue-rotate(90deg)'
         />
-        <ModalContent maxWidth="90vw" minWidth="60vw" width="auto">
+        <ModalContent maxWidth='90vw' minWidth='60vw' width='auto'>
           <ModalHeader>My Sandboxes</ModalHeader>
           <ModalCloseButton />
-          <ModalBody maxHeight="70vh">
-            <Flex justifyContent="flex-end">
+          <ModalBody maxHeight='70vh'>
+            <Flex justifyContent='flex-end'>
               <Button onClick={() => setShowActiveOnly(!showActiveOnly)}>
                 {showActiveOnly ? "Show All" : "Show Active Only"}
               </Button>
             </Flex>
-            <Box maxHeight="70vh" overflowY="auto">
+            <Box maxHeight='70vh' overflowY='auto'>
               {!loading ? (
-                <Table variant="simple">
+                <Table variant='simple'>
                   <Thead>
                     <Tr>
                       {headers.map((header) => (
@@ -297,43 +297,43 @@ const TableModal = ({ isOpen, onClose }) => {
                                 ? item[field] === "Active"
                                   ? "green.500"
                                   : item[field] === "Deleted"
-                                    ? "red.500"
-                                    : item[field] === "Creating"
-                                      ? "orange.500"
-                                      : item[field] === "Deleting"
-                                        ? "orange.500"
-                                        : item[field] === "Resetting"
-                                          ? "orange.500"
-                                          : null
+                                  ? "red.500"
+                                  : item[field] === "Creating"
+                                  ? "orange.500"
+                                  : item[field] === "Deleting"
+                                  ? "orange.500"
+                                  : item[field] === "Resetting"
+                                  ? "orange.500"
+                                  : null
                                 : null
                             }
                           >
                             {field === "Budget"
                               ? new Intl.NumberFormat("en-US", {
-                                style: "currency",
-                                currency: "USD",
-                                maximumFractionDigits: 0,
-                              }).format(item[field])
+                                  style: "currency",
+                                  currency: "USD",
+                                  maximumFractionDigits: 0,
+                                }).format(item[field])
                               : field === "RowKey"
-                                ? item["RowKey"]
-                                : item[field]}
+                              ? item["RowKey"]
+                              : item[field]}
                           </Td>
                         ))}
                         <Td>
-                          <Flex justifyContent="center">
+                          <Flex justifyContent='center'>
                             <Box>
                               {item.Status === "Resetting" ? (
-                                <Spinner size="sm" />
+                                <Spinner size='sm' />
                               ) : (
                                 <Tooltip
-                                  label="Reset Sandbox"
-                                  aria-label="Reset Sandbox"
+                                  label='Reset Sandbox'
+                                  aria-label='Reset Sandbox'
                                   openDelay={500}
                                 >
                                   <IconButton
-                                    aria-label="Reset Sandbox"
+                                    aria-label='Reset Sandbox'
                                     icon={<RepeatIcon />}
-                                    size="sm"
+                                    size='sm'
                                     onClick={() => handleResetClick(item)}
                                     isDisabled={item.Status !== "Active"}
                                   />
@@ -343,20 +343,20 @@ const TableModal = ({ isOpen, onClose }) => {
                           </Flex>
                         </Td>
                         <Td>
-                          <Flex justifyContent="center">
+                          <Flex justifyContent='center'>
                             <Box>
                               {item.Status === "Deleting" ? (
-                                <Spinner size="sm" />
+                                <Spinner size='sm' />
                               ) : (
                                 <Tooltip
-                                  label="Delete Sandbox"
-                                  aria-label="Delete Sandbox"
+                                  label='Delete Sandbox'
+                                  aria-label='Delete Sandbox'
                                   openDelay={500}
                                 >
                                   <IconButton
-                                    aria-label="Delete Sandbox"
+                                    aria-label='Delete Sandbox'
                                     icon={<DeleteIcon />}
-                                    size="sm"
+                                    size='sm'
                                     onClick={() => handleDeleteClick(item)}
                                     isDisabled={item.Status !== "Active"}
                                   />
@@ -366,15 +366,15 @@ const TableModal = ({ isOpen, onClose }) => {
                           </Flex>
                         </Td>
                         <Td>
-                          <Flex justifyContent="center">
+                          <Flex justifyContent='center'>
                             <Tooltip
-                              label="View Sandbox"
-                              aria-label="View Sandbox"
+                              label='View Sandbox'
+                              aria-label='View Sandbox'
                               openDelay={500}
                             >
                               <IconButton
                                 icon={<LinkIcon />}
-                                size="sm"
+                                size='sm'
                                 onClick={() => handleLink(item)}
                                 isDisabled={item.Status !== "Active"}
                               />
@@ -386,14 +386,14 @@ const TableModal = ({ isOpen, onClose }) => {
                   </Tbody>
                 </Table>
               ) : (
-                <Flex justifyContent="center" alignItems="center" height="25vh">
+                <Flex justifyContent='center' alignItems='center' height='25vh'>
                   <Spinner />
                 </Flex>
               )}
             </Box>
           </ModalBody>
           <ModalFooter>
-            <Button colorScheme="blue" mr={3} onClick={onClose}>
+            <Button colorScheme='blue' mr={3} onClick={onClose}>
               Close
             </Button>
           </ModalFooter>
@@ -402,17 +402,17 @@ const TableModal = ({ isOpen, onClose }) => {
       <AlertDialogWithActions
         isOpen={isDeleteOpen}
         onClose={handleDeleteConfirmClose}
-        actionName="Delete"
+        actionName='Delete'
         onAction={() => handleDeleteSandbox(selectedSandbox)}
-        title="Delete Sandbox"
+        title='Delete Sandbox'
         message={`Are you sure you want to delete ${selectedSandbox?.RowKey}?`}
       />
       <AlertDialogWithActions
         isOpen={isResetOpen}
         onClose={handleResetConfirmClose}
-        actionName="Reset"
+        actionName='Reset'
         onAction={() => handleResetSandbox(selectedSandbox)}
-        title="Reset Sandbox"
+        title='Reset Sandbox'
         message={`Are you sure you want to reset ${selectedSandbox?.RowKey}?`}
       />
     </>

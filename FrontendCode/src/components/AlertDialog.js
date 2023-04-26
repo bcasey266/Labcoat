@@ -32,7 +32,7 @@ const AlertDialogWithActions = ({
     >
       <AlertDialogOverlay>
         <AlertDialogContent>
-          <AlertDialogHeader fontSize="lg" fontWeight="bold">
+          <AlertDialogHeader fontSize='lg' fontWeight='bold'>
             {title}
           </AlertDialogHeader>
 
@@ -42,7 +42,7 @@ const AlertDialogWithActions = ({
             <Button ref={cancelRef} onClick={onClose}>
               Cancel
             </Button>
-            <Button colorScheme="red" onClick={handleAction} ml={3}>
+            <Button colorScheme='red' onClick={handleAction} ml={3}>
               {actionName}
             </Button>
           </AlertDialogFooter>

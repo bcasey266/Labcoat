@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect } from "react";
 import {
   Heading,
   useToast,
@@ -19,6 +19,7 @@ import {
   Spinner,
   Flex,
   IconButton,
+  Image,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -31,26 +32,38 @@ import {
   MenuList,
   MenuItem,
   MenuDivider,
-} from '@chakra-ui/react';
-import { FaDollarSign, FaUser, FaBars, FaDoorOpen, FaVectorSquare } from 'react-icons/fa';
+  Spacer,
+} from "@chakra-ui/react";
+import {
+  FaDollarSign,
+  FaUser,
+  FaBars,
+  FaDoorOpen,
+  FaVectorSquare,
+} from "react-icons/fa";
 
-import { AuthenticatedTemplate, UnauthenticatedTemplate, useMsal, useMsalAuthentication } from '@azure/msal-react';
+import {
+  AuthenticatedTemplate,
+  UnauthenticatedTemplate,
+  useMsal,
+  useMsalAuthentication,
+} from "@azure/msal-react";
 
-import './App.css';
-import './components/TableModal.js'
-import TableModal from './components/TableModal.js';
+import "./App.css";
+import "./components/TableModal.js";
+import TableModal from "./components/TableModal.js";
 /**
-* If a user is authenticated the ProfileContent component above is rendered. Otherwise a message indicating a user is not authenticated is rendered.
-*/
+ * If a user is authenticated the ProfileContent component above is rendered. Otherwise a message indicating a user is not authenticated is rendered.
+ */
 
 export default function App() {
   const { login, result, error } = useMsalAuthentication("redirect");
 
   return (
-    <div className="App">
+    <div className='App'>
       <AuthenticatedTemplate>
         <ChakraProvider>
-          <Box bg="gray.100" minHeight="100vh">
+          <Box bg='gray.100' minHeight='100vh'>
             <WebForm />
           </Box>
         </ChakraProvider>
@@ -58,22 +71,20 @@ export default function App() {
 
       <UnauthenticatedTemplate>
         <h5>
-          <center>
-            Please sign-in to create a sandbox.
-          </center>
+          <center>Please sign-in to create a sandbox.</center>
         </h5>
       </UnauthenticatedTemplate>
     </div>
   );
-};
+}
 
 const WebForm = () => {
   const toast = useToast();
 
   var { instance, accounts } = useMsal();
-  const [ManagerEmail, setManagerEmail] = useState('');
-  const [Budget, setBudget] = useState('');
-  const [Length, setLength] = useState('');
+  const [ManagerEmail, setManagerEmail] = useState("");
+  const [Budget, setBudget] = useState("");
+  const [Length, setLength] = useState("");
   const [CostCenter, setCostCenter] = useState([]);
   const [isValid, setIsValid] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
@@ -93,7 +104,7 @@ const WebForm = () => {
   const onSandboxOpen = () => setIsSandboxModalOpen(true);
 
   useEffect(() => {
-    if (Budget !== '' && Length !== '') {
+    if (Budget !== "" && Length !== "") {
       setIsValid(true);
     } else {
       setIsValid(false);
@@ -106,10 +117,10 @@ const WebForm = () => {
     console.log(accounts[0]);
 
     const payload = {
-      "FirstName": (accounts[0].name).split(" ")[0],
-      "LastName": (accounts[0].name).split(" ")[1],
-      "Email": (accounts[0].username),
-      "ObjectID": (accounts[0].localAccountId),
+      FirstName: accounts[0].name.split(" ")[0],
+      LastName: accounts[0].name.split(" ")[1],
+      Email: accounts[0].username,
+      ObjectID: accounts[0].localAccountId,
       ManagerEmail,
       Budget,
       Length,
@@ -127,37 +138,43 @@ const WebForm = () => {
         .then(async (accessTokenResponse) => {
           // Acquire token silent success
           let accessToken = accessTokenResponse.idToken;
-          console.log(accessTokenResponse)
+          console.log(accessTokenResponse);
 
-          const response = await fetch(process.env.REACT_APP_APIMName + '/' + process.env.REACT_APP_APIName + process.env.REACT_APP_APICreate, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': 'Bearer ' + accessToken,
-            },
-            body: JSON.stringify(payload),
-          });
+          const response = await fetch(
+            process.env.REACT_APP_APIMName +
+              "/" +
+              process.env.REACT_APP_APIName +
+              process.env.REACT_APP_APICreate,
+            {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: "Bearer " + accessToken,
+              },
+              body: JSON.stringify(payload),
+            }
+          );
 
-          console.log(accessToken)
+          console.log(accessToken);
 
           if (response.ok) {
             toast({
-              title: 'Submission successful',
-              description: 'Your form has been submitted successfully.',
-              status: 'success',
+              title: "Submission successful",
+              description: "Your form has been submitted successfully.",
+              status: "success",
               duration: 3000,
               isClosable: true,
-              position: 'top',
+              position: "top",
             });
             setIsLoading(false);
           } else {
             toast({
-              title: 'Submission failed',
-              description: 'There was a problem submitting your form.',
-              status: 'error',
+              title: "Submission failed",
+              description: "There was a problem submitting your form.",
+              status: "error",
               duration: 3000,
               isClosable: true,
-              position: 'top',
+              position: "top",
             });
             setIsLoading(false);
           }
@@ -165,41 +182,51 @@ const WebForm = () => {
         .catch((error) => {
           // Handle error here
           toast({
-            title: 'Submission failed',
-            description: 'There was a problem submitting your form.',
-            status: 'error',
+            title: "Submission failed",
+            description: "There was a problem submitting your form.",
+            status: "error",
             duration: 3000,
             isClosable: true,
-            position: 'top',
+            position: "top",
           });
           setIsLoading(false);
         });
     } catch (error) {
       toast({
-        title: 'Submission failed',
-        description: 'There was a problem submitting your form. ',
-        status: 'error',
+        title: "Submission failed",
+        description: "There was a problem submitting your form. ",
+        status: "error",
         duration: 3000,
         isClosable: true,
-        position: 'top',
+        position: "top",
       });
       setIsLoading(false);
     }
   };
 
   return (
-    <Container maxW="container.md" py={8}>
+    <Container maxW='container.md' py={8}>
+      <Flex bg='#3d3d3d' align='end'>
+        <Box p={2}>
+          <Image src='/logo.png' />
+        </Box>
+        <Spacer />
+        <Box boxSize='110px' p={2}>
+          <Image src='/logo192.png' />
+        </Box>
+      </Flex>
+
       <Box
-        bg="white"
-        boxShadow="base"
-        borderRadius="md"
+        bg='white'
+        boxShadow='base'
+        borderRadius='md'
         p={6}
-        mx="auto"
-        mt={4}
-        width="100%"
+        mx='auto'
+        mt={0}
+        width='100%'
       >
-        <Flex alignItems="center" mb={4}>
-          <Heading as="h1" size="lg" flex="1">
+        <Flex alignItems='center' mb={4}>
+          <Heading as='h1' size='lg' flex='1'>
             Sandbox Request
           </Heading>
           <Menu>
@@ -217,8 +244,14 @@ const WebForm = () => {
               <MenuItem icon={<FaVectorSquare />} onClick={onSandboxOpen}>
                 My Sandboxes
               </MenuItem>
-              <TableModal isOpen={isSandboxModalOpen} onClose={onSandboxClose} />
-              <MenuItem icon={<FaDoorOpen />} onClick={() => instance.logoutRedirect()}>
+              <TableModal
+                isOpen={isSandboxModalOpen}
+                onClose={onSandboxClose}
+              />
+              <MenuItem
+                icon={<FaDoorOpen />}
+                onClick={() => instance.logoutRedirect()}
+              >
                 Sign Out
               </MenuItem>
             </MenuList>
@@ -230,8 +263,8 @@ const WebForm = () => {
               <FormLabel>Manager Email</FormLabel>
               <InputGroup>
                 <Input
-                  type="string"
-                  placeholder="Nick.Fury@shield.com"
+                  type='string'
+                  placeholder='Nick.Fury@shield.com'
                   value={ManagerEmail}
                   onChange={(e) => setManagerEmail(e.target.value)}
                 />
@@ -241,12 +274,12 @@ const WebForm = () => {
             <FormControl>
               <FormLabel>Budget</FormLabel>
               <InputGroup>
-                <InputLeftElement pointerEvents="none">
+                <InputLeftElement pointerEvents='none'>
                   <Icon as={FaDollarSign} />
                 </InputLeftElement>
                 <Input
-                  type="number"
-                  placeholder="250"
+                  type='number'
+                  placeholder='250'
                   value={Budget}
                   onChange={(e) => setBudget(e.target.value)}
                 />
@@ -257,8 +290,8 @@ const WebForm = () => {
               <FormLabel>Cost Center</FormLabel>
               <InputGroup>
                 <Input
-                  type="string"
-                  placeholder="12345-123"
+                  type='string'
+                  placeholder='12345-123'
                   value={CostCenter}
                   onChange={(e) => setCostCenter(e.target.value)}
                 />
@@ -268,16 +301,20 @@ const WebForm = () => {
             <FormControl>
               <FormLabel>Length</FormLabel>
               <RadioGroup onChange={setLength} value={Length}>
-                <Stack direction="row">
-                  <Radio value="1">30 Days</Radio>
-                  <Radio value="2">60 Days</Radio>
-                  <Radio value="3">90 Days</Radio>
+                <Stack direction='row'>
+                  <Radio value='1'>30 Days</Radio>
+                  <Radio value='2'>60 Days</Radio>
+                  <Radio value='3'>90 Days</Radio>
                 </Stack>
               </RadioGroup>
             </FormControl>
 
-            <Button type="submit" colorScheme="blue" isDisabled={!isValid || isLoading}>
-              {isLoading ? <Spinner size="sm" mr={2} /> : null}
+            <Button
+              type='submit'
+              colorScheme='blue'
+              isDisabled={!isValid || isLoading}
+            >
+              {isLoading ? <Spinner size='sm' mr={2} /> : null}
               Submit
             </Button>
           </VStack>
@@ -292,12 +329,18 @@ const WebForm = () => {
           <ModalHeader>User Info</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            <Text><b>Name:</b> {accounts[0].name}</Text>
-            <Text><b>Email:</b> {accounts[0].username}</Text>
-            <Text><b>Object ID:</b> {accounts[0].localAccountId}</Text>
+            <Text>
+              <b>Name:</b> {accounts[0].name}
+            </Text>
+            <Text>
+              <b>Email:</b> {accounts[0].username}
+            </Text>
+            <Text>
+              <b>Object ID:</b> {accounts[0].localAccountId}
+            </Text>
           </ModalBody>
         </ModalContent>
       </Modal>
     </Container>
   );
-}
+};
