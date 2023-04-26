@@ -40,9 +40,13 @@ resource "null_resource" "frontend_publish" {
     Add-Content -Path .env -Value "REACT_APP_redirectUri=https://${azurerm_windows_web_app.this.default_hostname}"
     Add-Content -Path .env -Value "REACT_APP_clientID=${azuread_application.frontendapp.application_id}"
     Add-Content -Path .env -Value "REACT_APP_TenantID=${var.AzureADTenantID}"
+    Add-Content -Path .env -Value "REACT_APP_SandboxSubscription=${var.SandboxSubID}"
     Add-Content -Path .env -Value "REACT_APP_APIMName=${azurerm_api_management.this.gateway_url}"
     Add-Content -Path .env -Value "REACT_APP_APIName=${azurerm_api_management_api.this.name}"
     Add-Content -Path .env -Value "REACT_APP_APICreate=${azurerm_api_management_api_operation.create.url_template}"
+    Add-Content -Path .env -Value "REACT_APP_APIList=${azurerm_api_management_api_operation.list.url_template}"
+    Add-Content -Path .env -Value "REACT_APP_APIDelete=${azurerm_api_management_api_operation.delete.url_template}"
+    Add-Content -Path .env -Value "REACT_APP_APIReset=${azurerm_api_management_api_operation.reset.url_template}"
 
 
     npm run build
@@ -58,7 +62,12 @@ resource "null_resource" "frontend_publish" {
     webapphostname = azurerm_windows_web_app.this.default_hostname
     clientid       = azuread_application.frontendapp.application_id
     APIMName       = var.APIMName
+    tenantid       = var.AzureADTenantID
+    sandboxsubid   = var.SandboxSubID
     APIName        = azurerm_api_management_api.this.name
     createurl      = azurerm_api_management_api_operation.create.url_template
+    listurl        = azurerm_api_management_api_operation.list.url_template
+    deleteurl      = azurerm_api_management_api_operation.delete.url_template
+    reseturl       = azurerm_api_management_api_operation.reset.url_template
   }
 }
