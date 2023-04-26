@@ -72,7 +72,10 @@ const TableModal = ({ isOpen, onClose }) => {
 
   const handleDeleteSandbox = async () => {
     try {
-      await sandboxAction(selectedSandbox.RowKey, "delete");
+      await sandboxAction(
+        selectedSandbox.RowKey,
+        process.env.REACT_APP_APIDelete
+      );
       handleDeleteConfirmClose();
       toast({
         title: "Submission Received",
@@ -94,7 +97,10 @@ const TableModal = ({ isOpen, onClose }) => {
 
   const handleResetSandbox = async () => {
     try {
-      await sandboxAction(selectedSandbox.RowKey, "reset");
+      await sandboxAction(
+        selectedSandbox.RowKey,
+        process.env.REACT_APP_APIReset
+      );
       toast({
         title: "Submission Received",
         description: `Sandbox ${selectedSandbox.RowKey} has been queued for reset.`,
@@ -196,7 +202,7 @@ const TableModal = ({ isOpen, onClose }) => {
         account: accounts[0],
         forceRefresh: true,
       });
-      const endpoint = `${process.env.REACT_APP_APIMName}/${process.env.REACT_APP_APIName}/${action}`;
+      const endpoint = `${process.env.REACT_APP_APIMName}/${process.env.REACT_APP_APIName}${action}`;
       const headers = new Headers();
       headers.append("Authorization", `Bearer ${accessToken.idToken}`);
       headers.append("Content-Type", "application/json");
