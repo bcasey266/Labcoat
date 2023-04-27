@@ -12,9 +12,9 @@ terraform.tfvars
 Temp/
 
 # Reactjs Frontend Code Ignores
-FrontendCode/.env
-FrontendCode/node_modules/
-FrontendCode/Build
+.env
+node_modules
+App/FrontendCode/build
 
 # Mac Folder
 .DS_Store
