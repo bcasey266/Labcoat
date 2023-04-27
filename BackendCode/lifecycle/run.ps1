@@ -125,7 +125,7 @@ foreach ($Sandbox in $ActiveSandboxes) {
             "SandboxName"      = $Sandbox.Rowkey
             "Email"            = $Sandbox.User
             "FirstName"        = $Sandbox.FirstName
-            "EndDate"          = $Sandbox.EndDate
+            "DeleteOn"         = $Sandbox.EndDate
             "DaysLeft"         = ($Sandbox.EndDate - $Date).Days
             "CurrentCost"      = "{0:C0}" -f [int]$SandboxCost
         }  | ConvertTo-Json
