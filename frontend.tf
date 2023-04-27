@@ -29,7 +29,7 @@ data "archive_file" "frontend_app_code" {
   type        = "zip"
   source_dir  = "FrontendCode"
   output_path = "Temp/frontendcode.zip"
-  excludes    = ["build", "node_modules", ".env"]
+  excludes    = ["build", "node_modules", ".env", ".env.development"]
 }
 
 resource "null_resource" "frontend_publish" {
@@ -48,7 +48,7 @@ resource "null_resource" "frontend_publish" {
     Add-Content -Path .env -Value "REACT_APP_APIDelete=${azurerm_api_management_api_operation.delete.url_template}"
     Add-Content -Path .env -Value "REACT_APP_APIReset=${azurerm_api_management_api_operation.reset.url_template}"
 
-
+    npm install
     npm run build
     Compress-Archive -Path build\* -DestinationPath ..\Temp\frontendbuild.zip -force
     az webapp deployment source config-zip --resource-group ${azurerm_resource_group.this.name} --name ${azurerm_windows_web_app.this.name} --src ..\Temp\frontendbuild.zip --only-show-errors > ..\Temp\frontendoutput.txt

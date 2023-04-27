@@ -18,3 +18,4 @@ FrontendCode/Build
 
 # Mac Folder
 .DS_Store
+config.azurerm.tfbackend
