@@ -14,7 +14,7 @@ Temp/
 # Reactjs Frontend Code Ignores
 .env
 node_modules
-App/FrontendCode/build
+App/FrontendPortal/build
 
 # Mac Folder
 .DS_Store
