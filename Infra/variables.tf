@@ -57,6 +57,10 @@ variable "ApplicationInsightsName" {
 }
 
 ### network.tf Variables
+variable "PrivateNetworking" {
+  type = bool
+}
+
 variable "VNETName" {
   type        = string
   description = "VNET Name for ASAP"
