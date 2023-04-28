@@ -8,7 +8,7 @@ resource "azurerm_service_plan" "temp" {
 }
 
 resource "azurerm_windows_web_app" "this" {
-  name                = var.web_app_name
+  name                = var.web_app_frontend_name
   resource_group_name = var.resource_group_name
   location            = var.region
   service_plan_id     = azurerm_service_plan.temp.id

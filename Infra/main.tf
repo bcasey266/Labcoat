@@ -195,7 +195,7 @@ module "Frontend" {
   region                         = var.logic_app_region
   resource_group_name            = azurerm_resource_group.this.name
   app_service_plan_frontend_name = var.app_service_plan_frontend_name
-  web_app_name                   = var.web_app_name
+  web_app_frontend_name          = var.web_app_frontend_name
   FrontendAppID                  = module.APIM.FrontendAppID
   azuread_tenant_id              = var.azuread_tenant_id
   sandbox_azure_subscription_id  = var.sandbox_azure_subscription_id

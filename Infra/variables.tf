@@ -1,9 +1,3 @@
-variable "region" {
-  description = "The primary Azure region that the management resources will be placed in."
-  type        = string
-  default     = "eastus"
-}
-
 variable "sandbox_azure_subscription_id" {
   description = "The Azure Subscription ID that will host the Sandbox Resource Groups."
   type        = string
@@ -30,6 +24,12 @@ variable "ip_allowlist" {
     name     = ""
     priority = 1
   }]
+}
+
+variable "region" {
+  description = "The primary Azure region that the management resources will be placed in."
+  type        = string
+  default     = "eastus"
 }
 
 variable "resource_group_name" {
@@ -102,7 +102,7 @@ variable "app_service_plan_frontend_name" {
   default     = ""
 }
 
-variable "web_app_name" {
+variable "web_app_frontend_name" {
   description = "The name of the Web App resource that hosts the frontend portal"
   type        = string
   default     = ""
