@@ -58,3 +58,23 @@ variable "AdminIPs" {
   type        = list(any)
   description = "List of Admin IPs"
 }
+
+variable "AppInsightsID" {
+  type = string
+}
+
+variable "AppInsightsConnectionString" {
+  type = string
+}
+
+variable "AppInsightsInstrumentationKey" {
+  type = string
+}
+
+variable "StorageQueueNotifications" {
+  type = string
+}
+
+variable "FrontendPortalURL" {
+  type = string
+}

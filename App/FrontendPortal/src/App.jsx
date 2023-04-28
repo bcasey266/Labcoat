@@ -212,7 +212,7 @@ const WebForm = () => {
         </Box>
         <Spacer />
         <Box boxSize='110px' p={2}>
-          <Image src='/logo192.png' />
+          <Image src='/Erobi.png' />
         </Box>
       </Flex>
 

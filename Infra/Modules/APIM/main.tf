@@ -18,8 +18,7 @@ resource "azuread_application" "frontendapp" {
     }
   }
   single_page_application {
-    redirect_uris = ["http://localhost:3000/" //, "https://${azurerm_windows_web_app.this.default_hostname}/"
-    ]
+    redirect_uris = ["http://localhost:3000/", "https://${var.FrontendHostname}/"]
   }
   required_resource_access {
     resource_app_id = "00000003-0000-0000-c000-000000000000"

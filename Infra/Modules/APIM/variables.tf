@@ -44,6 +44,10 @@ variable "FunctionAppHostName" {
   description = "The admin's email in charge of APIM"
 }
 
+variable "FrontendHostname" {
+  type = string
+}
+
 variable "FunctionAppHostKey" {
   type        = string
   description = "The admin's email in charge of APIM"

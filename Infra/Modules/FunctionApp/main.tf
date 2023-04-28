@@ -37,18 +37,18 @@ resource "azurerm_windows_function_app" "this" {
   name                = var.FunctionAppName
   resource_group_name = var.ResourceGroupName
   location            = var.location
-  /*   tags = {
-    "hidden-link: /app-insights-conn-string"         = azurerm_application_insights.this.connection_string
-    "hidden-link: /app-insights-instrumentation-key" = azurerm_application_insights.this.instrumentation_key
-    "hidden-link: /app-insights-resource-id"         = azurerm_application_insights.this.id
-  } 
+  tags = {
+    "hidden-link: /app-insights-conn-string"         = var.AppInsightsConnectionString
+    "hidden-link: /app-insights-instrumentation-key" = var.AppInsightsInstrumentationKey
+    "hidden-link: /app-insights-resource-id"         = var.AppInsightsID
+  }
 
   lifecycle {
     ignore_changes = [
       tags["hidden-link: /app-insights-resource-id"]
     ]
   }
-
+  /*
   depends_on = [
     azurerm_private_endpoint.sandboxmgmtstorageblob,
     azurerm_private_endpoint.sandboxmgmtstoragetable,
@@ -59,11 +59,11 @@ resource "azurerm_windows_function_app" "this" {
     azurerm_role_assignment.sandboxmgmtSAContributor,
   ] */
 
-  storage_key_vault_secret_id     = var.keyvaultsecret //azurerm_key_vault_secret.sandboxmgmtstorage.versionless_id
-  key_vault_reference_identity_id = var.useridentity   //azurerm_user_assigned_identity.this.id
+  storage_key_vault_secret_id     = var.keyvaultsecret
+  key_vault_reference_identity_id = var.useridentity
   service_plan_id                 = azurerm_service_plan.this.id
   https_only                      = true
-  virtual_network_subnet_id       = var.SubnetID //azurerm_subnet.vnetintegration.id
+  virtual_network_subnet_id       = var.SubnetID
 
   app_settings = {
     "WEBSITE_RUN_FROM_PACKAGE"                 = "1"
@@ -76,11 +76,11 @@ resource "azurerm_windows_function_app" "this" {
     "StorageQueueNewSandbox"                   = azurerm_storage_queue.newsandbox.name
     "StorageQueueDeleteSandbox"                = azurerm_storage_queue.deletesandbox.name
     "StorageQueueResetSandbox"                 = azurerm_storage_queue.resetsandbox.name
-    //"StorageQueueNotifications"                = azurerm_storage_queue.notification.name
-    "StorageTableSandbox"           = azurerm_storage_table.sandboxtable.name
-    "SandboxManagementSubscription" = var.SandboxManagementSubscription //split("/", azurerm_resource_group.this.id)[2]
-    "SandboxSubscription"           = var.SandboxSubID
-    "ManagedIdentityClientID"       = var.useridentityclientid //azurerm_user_assigned_identity.this.client_id
+    "StorageQueueNotifications"                = var.StorageQueueNotifications
+    "StorageTableSandbox"                      = azurerm_storage_table.sandboxtable.name
+    "SandboxManagementSubscription"            = var.SandboxManagementSubscription
+    "SandboxSubscription"                      = var.SandboxSubID
+    "ManagedIdentityClientID"                  = var.useridentityclientid
   }
 
   identity {
@@ -89,12 +89,12 @@ resource "azurerm_windows_function_app" "this" {
   }
 
   site_config {
-    ftps_state          = "Disabled"
-    minimum_tls_version = "1.2"
-    //application_insights_connection_string = azurerm_application_insights.this.connection_string
-    //application_insights_key               = azurerm_application_insights.this.instrumentation_key
-    vnet_route_all_enabled      = true
-    scm_use_main_ip_restriction = true
+    ftps_state                             = "Disabled"
+    minimum_tls_version                    = "1.2"
+    application_insights_connection_string = var.AppInsightsConnectionString
+    application_insights_key               = var.AppInsightsInstrumentationKey
+    vnet_route_all_enabled                 = true
+    scm_use_main_ip_restriction            = true
     application_stack {
       powershell_core_version = "7.2"
     }
@@ -131,8 +131,7 @@ resource "azurerm_windows_function_app" "this" {
     } */
 
     cors {
-      allowed_origins = ["http://localhost:3000" //, "https://${azurerm_windows_web_app.this.default_hostname}"
-      ]
+      allowed_origins = ["http://localhost:3000", "https://${var.FrontendPortalURL}"]
     }
   }
 }
@@ -141,7 +140,7 @@ resource "azurerm_windows_function_app" "this" {
 data "archive_file" "function_app_code" {
   type        = "zip"
   source_dir  = "../App/BackendFunction"
-  output_path = "../Temp/backendcode.zip"
+  output_path = "../Temp/backendfunction.zip"
 }
 
 resource "null_resource" "function_app_publish" {

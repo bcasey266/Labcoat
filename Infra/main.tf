@@ -131,11 +131,18 @@ module "Networking" {
 module "FunctionApp" {
   source = "./Modules/FunctionApp"
 
+  depends_on = [
+    module.Networking,
+    azurerm_role_assignment.sandboxmgmtSecretReader,
+    azurerm_role_assignment.sandboxmgmtBlobContributor,
+    azurerm_role_assignment.sandboxmgmtSAContributor,
+  ]
+
   location                      = var.location
   SandboxSubID                  = var.SandboxSubID
   ResourceGroupName             = azurerm_resource_group.this.name
   SubnetID                      = var.PrivateNetworking == true ? module.Networking[0].VNETIntegrationSubnetID : null
-  StorageAccountName            = var.StorageAccountName
+  StorageAccountName            = azurerm_storage_account.this.name
   ServicePlanName               = var.ServicePlanName
   FunctionAppName               = var.FunctionAppName
   keyvaultsecret                = azurerm_key_vault_secret.sandboxmgmtstorage.versionless_id
@@ -143,6 +150,11 @@ module "FunctionApp" {
   useridentityclientid          = azurerm_user_assigned_identity.this.client_id
   SandboxManagementSubscription = data.azurerm_client_config.current.subscription_id
   AdminIPs                      = var.AdminIPs
+  AppInsightsID                 = azurerm_application_insights.this.id
+  AppInsightsConnectionString   = azurerm_application_insights.this.connection_string
+  AppInsightsInstrumentationKey = azurerm_application_insights.this.instrumentation_key
+  StorageQueueNotifications     = module.Notifications.StorageQueueNotifications
+  FrontendPortalURL             = module.Frontend.FrontendPortalURL
 }
 
 module "Notifications" {
@@ -153,9 +165,9 @@ module "Notifications" {
   ResourceGroupID               = azurerm_resource_group.this.id
   SandboxManagementSubscription = data.azurerm_client_config.current.subscription_id
   LogicAppName                  = var.LogicAppName
-  FrontendPortalURL             = "" //azurerm_windows_web_app.this.default_hostname
+  FrontendPortalURL             = module.Frontend.FrontendPortalURL
   SandboxSubID                  = var.SandboxSubID
-  StorageAccountName            = var.StorageAccountName
+  StorageAccountName            = azurerm_storage_account.this.name
   StorageAccountID              = azurerm_storage_account.this.id
   TenantID                      = var.AzureADTenantID
 }
@@ -165,6 +177,7 @@ module "APIM" {
 
   FrontendApp         = var.FrontendApp
   AppOwnerObjectID    = data.azuread_client_config.current.object_id
+  FrontendHostname    = module.Frontend.FrontendHostname
   location            = var.LogicAppLocation
   ResourceGroupName   = azurerm_resource_group.this.name
   APIMName            = var.APIMName
@@ -174,5 +187,22 @@ module "APIM" {
   FunctionAppHostName = module.FunctionApp.FunctionAppHostName
   FunctionAppHostKey  = module.FunctionApp.FunctionAppHostKey
   AzureADTenantID     = var.AzureADTenantID
+}
 
+module "Frontend" {
+  source = "./Modules/Frontend"
+
+  location          = var.LogicAppLocation
+  ResourceGroupName = azurerm_resource_group.this.name
+  ServicePlanFEName = var.ServicePlanFEName
+  WebAppName        = var.WebAppName
+  FrontendAppID     = module.APIM.FrontendAppID
+  AzureADTenantID   = var.AzureADTenantID
+  SandboxSubID      = var.SandboxSubID
+  APIMGatewayURL    = module.APIM.APIMGatewayURL
+  APIName           = module.APIM.APIName
+  APICreateURL      = module.APIM.APICreateURL
+  APIListURL        = module.APIM.APIListURL
+  APIDeleteURL      = module.APIM.APIDeleteURL
+  APIResetURL       = module.APIM.APIResetURL
 }
