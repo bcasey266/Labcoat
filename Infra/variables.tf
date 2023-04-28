@@ -19,9 +19,9 @@ variable "ip_allowlist" {
     priority = number
   }))
   default = [{
-    cidr     = 32
-    ip       = ""
     name     = ""
+    ip       = ""
+    cidr     = 32
     priority = 1
   }]
 }
@@ -72,6 +72,12 @@ variable "application_insights_name" {
   default     = ""
 }
 
+variable "managed_identity_name" {
+  description = "The name of the Managed Identity used for authentication and authorization within the platform"
+  type        = string
+  default     = ""
+}
+
 variable "enable_private_networking" {
   description = "If enabled, a Virtual Network will be created and all resources will be connected through Private Endpoints instead of communicating publicly"
   type        = bool
@@ -82,6 +88,20 @@ variable "vnet_name" {
   description = "Name of the VNET that will be created if enable_private_networking is enabled"
   type        = string
   default     = ""
+}
+
+variable "vnet_ip_space" {
+  description = "VNET IP configurations to host WebApp VNET Integration and Private Endpoints"
+  type = object({
+    vnetcidr            = string
+    privateendpointcidr = string
+    vnetintegrationcidr = string
+  })
+  default = [{
+    vnetcidr            = "10.0.0.0/24"
+    privateendpointcidr = "10.0.0.64/27"
+    vnetintegrationcidr = "10.0.0.96/27"
+  }]
 }
 
 variable "app_service_plan_name" {

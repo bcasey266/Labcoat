@@ -2,14 +2,14 @@ resource "azapi_resource" "queueapiconnection" {
   type                      = "Microsoft.Web/connections@2016-06-01"
   schema_validation_enabled = false
   name                      = "queue"
-  location                  = var.region
-  parent_id                 = var.ResourceGroupID
+  location                  = var.logic_app_region
+  parent_id                 = var.resource_group_id
   body = jsonencode({
     properties = {
       api = {
         name        = "azurequeues",
         displayName = "Azure Queues",
-        id          = "/subscriptions/${var.SandboxManagementSubscription}/providers/Microsoft.Web/locations/${var.region}/managedApis/azurequeues",
+        id          = "/subscriptions/${var.platform_subscription_id}/providers/Microsoft.Web/locations/${var.logic_app_region}/managedApis/azurequeues",
         type        = "Microsoft.Web/locations/managedApis"
       }
       parameterValueSet = {
@@ -24,14 +24,14 @@ resource "azapi_resource" "office365apiconnection" {
   type                      = "Microsoft.Web/connections@2016-06-01"
   schema_validation_enabled = false
   name                      = "office365"
-  location                  = var.region
-  parent_id                 = var.ResourceGroupID
+  location                  = var.logic_app_region
+  parent_id                 = var.resource_group_id
   body = jsonencode({
     properties = {
       api = {
         name        = "office365",
         displayName = "Office 365 Outlook",
-        id          = "/subscriptions/${var.SandboxManagementSubscription}/providers/Microsoft.Web/locations/${var.region}/managedApis/office365",
+        id          = "/subscriptions/${var.platform_subscription_id}/providers/Microsoft.Web/locations/${var.logic_app_region}/managedApis/office365",
         type        = "Microsoft.Web/locations/managedApis"
       }
     }
@@ -41,7 +41,7 @@ resource "azapi_resource" "office365apiconnection" {
 
 resource "azurerm_logic_app_workflow" "this" {
   name                = var.logic_app_name
-  location            = var.region
+  location            = var.logic_app_region
   resource_group_name = var.resource_group_name
   identity {
     type = "SystemAssigned"
@@ -71,7 +71,7 @@ resource "azurerm_logic_app_workflow" "this" {
       type         = "Object"
     }),
     "frontend" : jsonencode({
-      "defaultValue" : "https://${var.FrontendPortalURL}/",
+      "defaultValue" : "https://${var.frontend_url}/",
       "type" : "String"
     }),
     "SandboxSubscription" : jsonencode({
@@ -87,7 +87,7 @@ resource "azurerm_storage_queue" "notification" {
 }
 
 resource "azurerm_role_assignment" "logicappQueueContributor" {
-  scope                = var.StorageAccountID
+  scope                = var.storage_account_id
   role_definition_name = "Storage Queue Data Contributor"
   principal_id         = azurerm_logic_app_workflow.this.identity[0].principal_id
 }

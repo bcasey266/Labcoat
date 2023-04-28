@@ -3,11 +3,6 @@ variable "frontend_app_registration_name" {
   description = "Frontend Azure AD App Registration Name"
 }
 
-variable "AppOwnerObjectID" {
-  type        = string
-  description = "Frontend Azure AD App Registration Name"
-}
-
 variable "region" {
   type        = string
   description = "The azure region to place resources in"

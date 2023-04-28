@@ -29,9 +29,17 @@ log_analytics_name = ""
 
 application_insights_name = ""
 
+managed_identity_name = ""
+
 enable_private_networking = true
 
 vnet_name = ""
+
+vnet_ip_space = [{
+  vnetcidr            = "10.0.0.0/24"
+  privateendpointcidr = "10.0.0.64/27"
+  vnetintegrationcidr = "10.0.0.96/27"
+}]
 
 app_service_plan_name = ""
 

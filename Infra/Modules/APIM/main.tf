@@ -1,9 +1,17 @@
 resource "random_uuid" "frontendapp" {}
 
+data "azuread_client_config" "current" {}
+
+data "azurerm_function_app_host_keys" "deploykeys" {
+  name                = azurerm_windows_function_app.this.name
+  resource_group_name = var.resource_group_name
+}
+
+
 resource "azuread_application" "frontendapp" {
   display_name     = var.frontend_app_registration_name
   identifier_uris  = ["api://${var.frontend_app_registration_name}"]
-  owners           = [var.AppOwnerObjectID]
+  owners           = [data.azuread_client_config.current.object_id]
   sign_in_audience = "AzureADMyOrg"
 
   api {

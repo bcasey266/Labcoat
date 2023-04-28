@@ -1,22 +1,31 @@
-variable "region" {
+variable "app_service_plan_name" {
+  description = "The name of the App Service Plan that will host the Fuctions used to manage the platform"
   type        = string
-  description = "The azure region to place resources in"
+  default     = ""
+}
+
+variable "function_app_name" {
+  description = "The name of the Function App that hosts the Functions for the platform"
+  type        = string
+  default     = ""
+}
+
+variable "region" {
+  description = "The primary Azure region that the management resources will be placed in."
+  type        = string
   default     = "eastus"
 }
 
-variable "sandbox_azure_subscription_id" {
-  type        = string
-  description = "The Subscription ID of the Sandbox Subscription"
-}
-
 variable "resource_group_name" {
+  description = "The name of the Resource Group that will hold the Sandbox Platform Management Resources"
   type        = string
-  description = "Resource Group Name for ASAP that contains the platform level resources"
+  default     = ""
 }
 
 variable "storage_account_name" {
+  description = "The name of the Storage Account used to host the Tables, Queues, and Code for Sandbox Platform Management"
   type        = string
-  description = "Storage Account Name for ASAP to host Tables and Queues"
+  default     = ""
 
   validation {
     condition     = can(regex("[a-z0-9]+([-]?[a-z0-9]){2,63}", var.storage_account_name))
@@ -24,34 +33,22 @@ variable "storage_account_name" {
   }
 }
 
-variable "app_service_plan_name" {
+variable "storage_account_connection_string" {
+  description = "The Storage Account Connection String used to connect Function App to Storage Account"
   type        = string
-  description = "App Service Plan Name for ASAP"
+  default     = ""
 }
 
-variable "function_app_name" {
+variable "queue_notifications" {
+  description = "The name of the Queue used for sending notifications from the Logic App"
   type        = string
-  description = "Function App Name for ASAP"
+  default     = ""
 }
 
-variable "SubnetID" {
-  type = string
-}
-
-variable "keyvaultsecret" {
-  type = string
-}
-
-variable "useridentity" {
-  type = string
-}
-
-variable "useridentityclientid" {
-  type = string
-}
-
-variable "SandboxManagementSubscription" {
-  type = string
+variable "subnet_integration_id" {
+  description = "The ID of the Integration Subnet"
+  type        = string
+  default     = ""
 }
 
 variable "ip_allowlist" {
@@ -63,29 +60,57 @@ variable "ip_allowlist" {
     priority = number
   }))
   default = [{
-    cidr     = 32
-    ip       = ""
     name     = ""
+    ip       = ""
+    cidr     = 32
     priority = 1
   }]
 }
 
-variable "AppInsightsID" {
-  type = string
+variable "user_identity_id" {
+  description = "The Resource ID of the User Managed Identity"
+  type        = string
+  default     = ""
 }
 
-variable "AppInsightsConnectionString" {
-  type = string
+variable "user_identity_client_id" {
+  description = "The Client ID of the User Managed Identity"
+  type        = string
+  default     = ""
 }
 
-variable "AppInsightsInstrumentationKey" {
-  type = string
+variable "app_insights_id" {
+  description = "The Resource ID of the Application Insights used to store Function runtime logs"
+  type        = string
+  default     = ""
 }
 
-variable "StorageQueueNotifications" {
-  type = string
+variable "app_insights_connection_string" {
+  description = "The Connection String for the Application Insights resource used to store Function runtime logs"
+  type        = string
+  default     = ""
 }
 
-variable "FrontendPortalURL" {
-  type = string
+variable "app_insights_instrumentation_key" {
+  description = "The Instrumentation Key for the Application Insights resource used to store Function runtime logs"
+  type        = string
+  default     = ""
+}
+
+variable "platform_subscription_id" {
+  description = "The ID of the Platform Subscription that hosts the Sandbox Management Resources"
+  type        = string
+  default     = ""
+}
+
+variable "sandbox_azure_subscription_id" {
+  description = "The Azure Subscription ID that will host the Sandbox Resource Groups."
+  type        = string
+  default     = ""
+}
+
+variable "frontend_url" {
+  description = "The URL of the Frontend Portal"
+  type        = string
+  default     = ""
 }
