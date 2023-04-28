@@ -142,6 +142,7 @@ module "FunctionApp" {
   useridentity                  = azurerm_user_assigned_identity.this.id
   useridentityclientid          = azurerm_user_assigned_identity.this.client_id
   SandboxManagementSubscription = data.azurerm_client_config.current.subscription_id
+  AdminIPs                      = var.AdminIPs
 }
 
 module "Notifications" {
@@ -157,4 +158,21 @@ module "Notifications" {
   StorageAccountName            = var.StorageAccountName
   StorageAccountID              = azurerm_storage_account.this.id
   TenantID                      = var.AzureADTenantID
+}
+
+module "APIM" {
+  source = "./Modules/APIM"
+
+  FrontendApp         = var.FrontendApp
+  AppOwnerObjectID    = data.azuread_client_config.current.object_id
+  location            = var.LogicAppLocation
+  ResourceGroupName   = azurerm_resource_group.this.name
+  APIMName            = var.APIMName
+  APIMPublisherName   = var.APIMPublisherName
+  APIMPublisherEmail  = var.APIMPublisherEmail
+  FunctionAppName     = var.FunctionAppName
+  FunctionAppHostName = module.FunctionApp.FunctionAppHostName
+  FunctionAppHostKey  = module.FunctionApp.FunctionAppHostKey
+  AzureADTenantID     = var.AzureADTenantID
+
 }

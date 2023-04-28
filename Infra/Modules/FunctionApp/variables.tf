@@ -53,3 +53,8 @@ variable "useridentityclientid" {
 variable "SandboxManagementSubscription" {
   type = string
 }
+
+variable "AdminIPs" {
+  type        = list(any)
+  description = "List of Admin IPs"
+}

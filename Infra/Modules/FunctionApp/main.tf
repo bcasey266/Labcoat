@@ -99,7 +99,7 @@ resource "azurerm_windows_function_app" "this" {
       powershell_core_version = "7.2"
     }
 
-    /* ip_restriction {
+    ip_restriction {
       action     = "Allow"
       name       = "Gjon"
       priority   = 1
@@ -111,7 +111,7 @@ resource "azurerm_windows_function_app" "this" {
       name       = "Brandon"
       priority   = 2
       ip_address = "${var.AdminIPs[1]}/32"
-    } */
+    }
 
     ip_restriction {
       action      = "Allow"
@@ -136,7 +136,7 @@ resource "azurerm_windows_function_app" "this" {
     }
   }
 }
-/*
+
 ## Application Code
 data "archive_file" "function_app_code" {
   type        = "zip"
@@ -158,7 +158,7 @@ resource "null_resource" "function_app_publish" {
   }
 }
 
- data "azurerm_function_app_host_keys" "deploykeys" {
+data "azurerm_function_app_host_keys" "deploykeys" {
   name                = azurerm_windows_function_app.this.name
-  resource_group_name = azurerm_resource_group.this.name
-} */
+  resource_group_name = var.ResourceGroupName
+}
