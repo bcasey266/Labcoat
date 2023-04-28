@@ -22,7 +22,7 @@ provider "azurerm" {
 }
 
 provider "azuread" {
-  tenant_id = var.AzureADTenantID
+  tenant_id = var.azuread_tenant_id
 }
 
 provider "azapi" {

@@ -1,42 +1,42 @@
 resource "azurerm_service_plan" "this" {
-  name                = var.ServicePlanName
-  resource_group_name = var.ResourceGroupName
-  location            = var.location
+  name                = var.app_service_plan_name
+  resource_group_name = var.resource_group_name
+  location            = var.region
 
   os_type  = "Windows"
   sku_name = "EP1"
 }
 
 resource "azurerm_storage_share" "this" {
-  name                 = var.FunctionAppName
-  storage_account_name = var.StorageAccountName
+  name                 = var.function_app_name
+  storage_account_name = var.storage_account_name
   quota                = 50
 }
 
 resource "azurerm_storage_queue" "newsandbox" {
   name                 = "newsandbox"
-  storage_account_name = var.StorageAccountName
+  storage_account_name = var.storage_account_name
 }
 
 resource "azurerm_storage_queue" "deletesandbox" {
   name                 = "deletesandbox"
-  storage_account_name = var.StorageAccountName
+  storage_account_name = var.storage_account_name
 }
 
 resource "azurerm_storage_queue" "resetsandbox" {
   name                 = "resetsandbox"
-  storage_account_name = var.StorageAccountName
+  storage_account_name = var.storage_account_name
 }
 
 resource "azurerm_storage_table" "sandboxtable" {
   name                 = "sandboxtable"
-  storage_account_name = var.StorageAccountName
+  storage_account_name = var.storage_account_name
 }
 
 resource "azurerm_windows_function_app" "this" {
-  name                = var.FunctionAppName
-  resource_group_name = var.ResourceGroupName
-  location            = var.location
+  name                = var.function_app_name
+  resource_group_name = var.resource_group_name
+  location            = var.region
   tags = {
     "hidden-link: /app-insights-conn-string"         = var.AppInsightsConnectionString
     "hidden-link: /app-insights-instrumentation-key" = var.AppInsightsInstrumentationKey
@@ -48,16 +48,6 @@ resource "azurerm_windows_function_app" "this" {
       tags["hidden-link: /app-insights-resource-id"]
     ]
   }
-  /*
-  depends_on = [
-    azurerm_private_endpoint.sandboxmgmtstorageblob,
-    azurerm_private_endpoint.sandboxmgmtstoragetable,
-    azurerm_private_endpoint.sandboxmgmtstoragefile,
-    azurerm_private_endpoint.keyvault,
-    azurerm_role_assignment.sandboxmgmtSecretReader,
-    azurerm_role_assignment.sandboxmgmtBlobContributor,
-    azurerm_role_assignment.sandboxmgmtSAContributor,
-  ] */
 
   storage_key_vault_secret_id     = var.keyvaultsecret
   key_vault_reference_identity_id = var.useridentity
@@ -71,15 +61,15 @@ resource "azurerm_windows_function_app" "this" {
     "WEBSITE_CONTENTOVERVNET"                  = 1
     "WEBSITE_SKIP_CONTENTSHARE_VALIDATION"     = 1
     "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING" = "@Microsoft.KeyVault(SecretUri=${var.keyvaultsecret})"
-    "ResourceGroupName"                        = var.ResourceGroupName
-    "StorageAccountName"                       = var.StorageAccountName
+    "resource_group_name"                      = var.resource_group_name
+    "storage_account_name"                     = var.storage_account_name
     "StorageQueueNewSandbox"                   = azurerm_storage_queue.newsandbox.name
     "StorageQueueDeleteSandbox"                = azurerm_storage_queue.deletesandbox.name
     "StorageQueueResetSandbox"                 = azurerm_storage_queue.resetsandbox.name
     "StorageQueueNotifications"                = var.StorageQueueNotifications
     "StorageTableSandbox"                      = azurerm_storage_table.sandboxtable.name
     "SandboxManagementSubscription"            = var.SandboxManagementSubscription
-    "SandboxSubscription"                      = var.SandboxSubID
+    "SandboxSubscription"                      = var.sandbox_azure_subscription_id
     "ManagedIdentityClientID"                  = var.useridentityclientid
   }
 
@@ -100,35 +90,21 @@ resource "azurerm_windows_function_app" "this" {
     }
 
     ip_restriction {
-      action     = "Allow"
-      name       = "Gjon"
-      priority   = 1
-      ip_address = "${var.AdminIPs[0]}/32"
-    }
-
-    ip_restriction {
-      action     = "Allow"
-      name       = "Brandon"
-      priority   = 2
-      ip_address = "${var.AdminIPs[1]}/32"
-    }
-
-    ip_restriction {
       action      = "Allow"
       name        = "AzureCloud"
-      priority    = 3
+      priority    = 100
       service_tag = "AzureCloud"
     }
 
-    /* dynamic "ip_restriction" {
-      for_each = var.AdminIPs
+    dynamic "ip_restriction" {
+      for_each = var.ip_allowlist
       content {
         action     = "Allow"
-        name       = ip_restriction.value
-        priority   = ip_restriction.key + 1
-        ip_address = "${ip_restriction.value}/32"
+        name       = ip_restriction.value.name
+        priority   = ip_restriction.value.priority
+        ip_address = "${ip_restriction.value.ip}/${ip_restriction.value.cidr}"
       }
-    } */
+    }
 
     cors {
       allowed_origins = ["http://localhost:3000", "https://${var.FrontendPortalURL}"]
@@ -146,7 +122,7 @@ data "archive_file" "function_app_code" {
 resource "null_resource" "function_app_publish" {
   provisioner "local-exec" {
     command = <<-EOT
-    az webapp deployment source config-zip --resource-group ${var.ResourceGroupName} --name ${azurerm_windows_function_app.this.name} --src ${data.archive_file.function_app_code.output_path} --only-show-errors > ../Temp/output.txt  
+    az webapp deployment source config-zip --resource-group ${var.resource_group_name} --name ${azurerm_windows_function_app.this.name} --src ${data.archive_file.function_app_code.output_path} --only-show-errors > ../Temp/output.txt  
     EOT
 
     interpreter = ["PowerShell", "-Command"]
@@ -159,5 +135,5 @@ resource "null_resource" "function_app_publish" {
 
 data "azurerm_function_app_host_keys" "deploykeys" {
   name                = azurerm_windows_function_app.this.name
-  resource_group_name = var.ResourceGroupName
+  resource_group_name = var.resource_group_name
 }

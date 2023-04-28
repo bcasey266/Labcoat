@@ -3,12 +3,12 @@ data "azurerm_client_config" "current" {}
 data "azuread_client_config" "current" {}
 
 resource "azurerm_resource_group" "this" {
-  name     = var.ResourceGroupName
-  location = var.location
+  name     = var.resource_group_name
+  location = var.region
 }
 
 resource "azurerm_key_vault" "this" {
-  name                       = var.KeyVaultName
+  name                       = var.key_vault_name
   location                   = azurerm_resource_group.this.location
   resource_group_name        = azurerm_resource_group.this.name
   tenant_id                  = data.azurerm_client_config.current.tenant_id
@@ -20,19 +20,19 @@ resource "azurerm_key_vault" "this" {
   network_acls {
     bypass         = "AzureServices"
     default_action = "Deny"
-    ip_rules       = var.AdminIPs
+    ip_rules       = tolist(var.ip_allowlist[*].ip)
   }
 }
 
 resource "azurerm_storage_account" "this" {
   resource_group_name      = azurerm_resource_group.this.name
   location                 = azurerm_resource_group.this.location
-  name                     = var.StorageAccountName
+  name                     = var.storage_account_name
   account_replication_type = "LRS"
   account_tier             = "Standard"
   network_rules {
     default_action = "Deny"
-    ip_rules       = var.AdminIPs
+    ip_rules       = tolist(var.ip_allowlist[*].ip)
     bypass         = ["Logging", "Metrics", "AzureServices"]
     private_link_access {
       endpoint_resource_id = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/resourcegroups/${azurerm_resource_group.this.name}/providers/Microsoft.Logic/workflows/*"
@@ -52,7 +52,7 @@ resource "azurerm_key_vault_secret" "sandboxmgmtstorage" {
 }
 
 resource "azurerm_log_analytics_workspace" "this" {
-  name                = var.LogAnalyticsName
+  name                = var.log_analytics_name
   resource_group_name = azurerm_resource_group.this.name
   location            = azurerm_resource_group.this.location
   sku                 = "PerGB2018"
@@ -60,7 +60,7 @@ resource "azurerm_log_analytics_workspace" "this" {
 }
 
 resource "azurerm_application_insights" "this" {
-  name                = var.ApplicationInsightsName
+  name                = var.application_insights_name
   resource_group_name = azurerm_resource_group.this.name
   location            = azurerm_resource_group.this.location
   application_type    = "web"
@@ -69,7 +69,7 @@ resource "azurerm_application_insights" "this" {
 
 resource "azurerm_user_assigned_identity" "this" {
   location            = azurerm_resource_group.this.location
-  name                = "id-${var.FunctionAppName}"
+  name                = "id-${var.function_app_name}"
   resource_group_name = azurerm_resource_group.this.name
 }
 
@@ -104,7 +104,7 @@ resource "azurerm_role_assignment" "sandboxmgmtSecretReader" {
 }
 
 resource "azurerm_role_assignment" "sandboxmgmtSandboxMG" {
-  scope                = "/subscriptions/${var.SandboxSubID}"
+  scope                = "/subscriptions/${var.sandbox_azure_subscription_id}"
   role_definition_name = "Owner"
   principal_id         = azurerm_user_assigned_identity.this.principal_id
 }
@@ -115,16 +115,16 @@ resource "azuread_directory_role_assignment" "userread" {
 }
 
 module "Networking" {
-  count  = var.PrivateNetworking == true ? 1 : 0
+  count  = var.enable_private_networking == true ? 1 : 0
   source = "./Modules/Networking"
 
-  VNETName           = var.VNETName
-  location           = var.location
-  ResourceGroupName  = azurerm_resource_group.this.name
-  StorageAccountName = azurerm_storage_account.this.name
-  StorageAccountID   = azurerm_storage_account.this.id
-  KeyVaultName       = azurerm_key_vault.this.name
-  KeyVaultID         = azurerm_key_vault.this.id
+  vnet_name            = var.vnet_name
+  region               = var.region
+  resource_group_name  = azurerm_resource_group.this.name
+  storage_account_name = azurerm_storage_account.this.name
+  StorageAccountID     = azurerm_storage_account.this.id
+  key_vault_name       = azurerm_key_vault.this.name
+  KeyVaultID           = azurerm_key_vault.this.id
 }
 
 
@@ -138,18 +138,18 @@ module "FunctionApp" {
     azurerm_role_assignment.sandboxmgmtSAContributor,
   ]
 
-  location                      = var.location
-  SandboxSubID                  = var.SandboxSubID
-  ResourceGroupName             = azurerm_resource_group.this.name
-  SubnetID                      = var.PrivateNetworking == true ? module.Networking[0].VNETIntegrationSubnetID : null
-  StorageAccountName            = azurerm_storage_account.this.name
-  ServicePlanName               = var.ServicePlanName
-  FunctionAppName               = var.FunctionAppName
+  region                        = var.region
+  sandbox_azure_subscription_id = var.sandbox_azure_subscription_id
+  resource_group_name           = azurerm_resource_group.this.name
+  SubnetID                      = var.enable_private_networking == true ? module.Networking[0].VNETIntegrationSubnetID : null
+  storage_account_name          = azurerm_storage_account.this.name
+  app_service_plan_name         = var.app_service_plan_name
+  function_app_name             = var.function_app_name
   keyvaultsecret                = azurerm_key_vault_secret.sandboxmgmtstorage.versionless_id
   useridentity                  = azurerm_user_assigned_identity.this.id
   useridentityclientid          = azurerm_user_assigned_identity.this.client_id
   SandboxManagementSubscription = data.azurerm_client_config.current.subscription_id
-  AdminIPs                      = var.AdminIPs
+  ip_allowlist                  = var.ip_allowlist
   AppInsightsID                 = azurerm_application_insights.this.id
   AppInsightsConnectionString   = azurerm_application_insights.this.connection_string
   AppInsightsInstrumentationKey = azurerm_application_insights.this.instrumentation_key
@@ -160,49 +160,49 @@ module "FunctionApp" {
 module "Notifications" {
   source = "./Modules/Notifications"
 
-  location                      = var.LogicAppLocation
-  ResourceGroupName             = azurerm_resource_group.this.name
+  region                        = var.logic_app_region
+  resource_group_name           = azurerm_resource_group.this.name
   ResourceGroupID               = azurerm_resource_group.this.id
   SandboxManagementSubscription = data.azurerm_client_config.current.subscription_id
-  LogicAppName                  = var.LogicAppName
+  logic_app_name                = var.logic_app_name
   FrontendPortalURL             = module.Frontend.FrontendPortalURL
-  SandboxSubID                  = var.SandboxSubID
-  StorageAccountName            = azurerm_storage_account.this.name
+  sandbox_azure_subscription_id = var.sandbox_azure_subscription_id
+  storage_account_name          = azurerm_storage_account.this.name
   StorageAccountID              = azurerm_storage_account.this.id
-  TenantID                      = var.AzureADTenantID
+  TenantID                      = var.azuread_tenant_id
 }
 
 module "APIM" {
   source = "./Modules/APIM"
 
-  FrontendApp         = var.FrontendApp
-  AppOwnerObjectID    = data.azuread_client_config.current.object_id
-  FrontendHostname    = module.Frontend.FrontendHostname
-  location            = var.LogicAppLocation
-  ResourceGroupName   = azurerm_resource_group.this.name
-  APIMName            = var.APIMName
-  APIMPublisherName   = var.APIMPublisherName
-  APIMPublisherEmail  = var.APIMPublisherEmail
-  FunctionAppName     = var.FunctionAppName
-  FunctionAppHostName = module.FunctionApp.FunctionAppHostName
-  FunctionAppHostKey  = module.FunctionApp.FunctionAppHostKey
-  AzureADTenantID     = var.AzureADTenantID
+  frontend_app_registration_name = var.frontend_app_registration_name
+  AppOwnerObjectID               = data.azuread_client_config.current.object_id
+  FrontendHostname               = module.Frontend.FrontendHostname
+  region                         = var.logic_app_region
+  resource_group_name            = azurerm_resource_group.this.name
+  api_management_name            = var.api_management_name
+  api_management_admin_name      = var.api_management_admin_name
+  api_management_admin_email     = var.api_management_admin_email
+  function_app_name              = var.function_app_name
+  FunctionAppHostName            = module.FunctionApp.FunctionAppHostName
+  FunctionAppHostKey             = module.FunctionApp.FunctionAppHostKey
+  azuread_tenant_id              = var.azuread_tenant_id
 }
 
 module "Frontend" {
   source = "./Modules/Frontend"
 
-  location          = var.LogicAppLocation
-  ResourceGroupName = azurerm_resource_group.this.name
-  ServicePlanFEName = var.ServicePlanFEName
-  WebAppName        = var.WebAppName
-  FrontendAppID     = module.APIM.FrontendAppID
-  AzureADTenantID   = var.AzureADTenantID
-  SandboxSubID      = var.SandboxSubID
-  APIMGatewayURL    = module.APIM.APIMGatewayURL
-  APIName           = module.APIM.APIName
-  APICreateURL      = module.APIM.APICreateURL
-  APIListURL        = module.APIM.APIListURL
-  APIDeleteURL      = module.APIM.APIDeleteURL
-  APIResetURL       = module.APIM.APIResetURL
+  region                         = var.logic_app_region
+  resource_group_name            = azurerm_resource_group.this.name
+  app_service_plan_frontend_name = var.app_service_plan_frontend_name
+  web_app_name                   = var.web_app_name
+  FrontendAppID                  = module.APIM.FrontendAppID
+  azuread_tenant_id              = var.azuread_tenant_id
+  sandbox_azure_subscription_id  = var.sandbox_azure_subscription_id
+  APIMGatewayURL                 = module.APIM.APIMGatewayURL
+  APIName                        = module.APIM.APIName
+  APICreateURL                   = module.APIM.APICreateURL
+  APIListURL                     = module.APIM.APIListURL
+  APIDeleteURL                   = module.APIM.APIDeleteURL
+  APIResetURL                    = module.APIM.APIResetURL
 }

@@ -1,8 +1,8 @@
 resource "random_uuid" "frontendapp" {}
 
 resource "azuread_application" "frontendapp" {
-  display_name     = var.FrontendApp
-  identifier_uris  = ["api://${var.FrontendApp}"]
+  display_name     = var.frontend_app_registration_name
+  identifier_uris  = ["api://${var.frontend_app_registration_name}"]
   owners           = [var.AppOwnerObjectID]
   sign_in_audience = "AzureADMyOrg"
 
@@ -43,18 +43,18 @@ resource "azuread_application" "frontendapp" {
 }
 
 resource "azuread_application_pre_authorized" "frontendapp" {
-  application_object_id = azuread_application.frontendapp.object_id
-  authorized_app_id     = azuread_application.frontendapp.application_id
+  application_object_id = azuread_application.frontend_app_registration_name.object_id
+  authorized_app_id     = azuread_application.frontend_app_registration_name.application_id
   permission_ids        = [random_uuid.frontendapp.result]
 }
 
 resource "azurerm_api_management" "this" {
-  name                = var.APIMName
-  location            = var.location
-  resource_group_name = var.ResourceGroupName
+  name                = var.api_management_name
+  location            = var.region
+  resource_group_name = var.resource_group_name
   sku_name            = "Consumption_0"
-  publisher_name      = var.APIMPublisherName
-  publisher_email     = var.APIMPublisherEmail
+  publisher_name      = var.api_management_admin_name
+  publisher_email     = var.api_management_admin_email
 
   identity {
     type = "SystemAssigned"
@@ -62,8 +62,8 @@ resource "azurerm_api_management" "this" {
 }
 
 resource "azurerm_api_management_backend" "this" {
-  name                = var.FunctionAppName
-  resource_group_name = var.ResourceGroupName
+  name                = var.function_app_name
+  resource_group_name = var.resource_group_name
   api_management_name = azurerm_api_management.this.name
   protocol            = "http"
   url                 = "https://${var.FunctionAppHostName}/api"
@@ -76,7 +76,7 @@ resource "azurerm_api_management_backend" "this" {
 
 resource "azurerm_api_management_api" "this" {
   name                  = "sandbox"
-  resource_group_name   = var.ResourceGroupName
+  resource_group_name   = var.resource_group_name
   api_management_name   = azurerm_api_management.this.name
   revision              = 1
   display_name          = "sandbox"
@@ -88,7 +88,7 @@ resource "azurerm_api_management_api" "this" {
 resource "azurerm_api_management_api_policy" "this" {
   api_name            = azurerm_api_management_api.this.name
   api_management_name = azurerm_api_management_api.this.api_management_name
-  resource_group_name = var.ResourceGroupName
+  resource_group_name = var.resource_group_name
 
   xml_content = <<XML
 <policies>
@@ -109,10 +109,10 @@ resource "azurerm_api_management_api_policy" "this" {
             </allowed-headers>
         </cors>
         <validate-jwt header-name="Authorization" failed-validation-httpcode="401" failed-validation-error-message="Unauthorized">
-            <openid-config url="https://login.microsoftonline.com/${var.AzureADTenantID}/v2.0/.well-known/openid-configuration" />
+            <openid-config url="https://login.microsoftonline.com/${var.azuread_tenant_id}/v2.0/.well-known/openid-configuration" />
             <required-claims>
                 <claim name="aud">
-                    <value>${azuread_application.frontendapp.application_id}</value>
+                    <value>${azuread_application.frontend_app_registration_name.application_id}</value>
                 </claim>
             </required-claims>
         </validate-jwt>
@@ -153,7 +153,7 @@ resource "azurerm_api_management_api_operation" "create" {
   operation_id        = "create"
   api_name            = azurerm_api_management_api.this.name
   api_management_name = azurerm_api_management_api.this.api_management_name
-  resource_group_name = var.ResourceGroupName
+  resource_group_name = var.resource_group_name
   display_name        = "Create Sandbox"
   method              = "POST"
   url_template        = "/create"
@@ -167,7 +167,7 @@ resource "azurerm_api_management_api_operation" "list" {
   operation_id        = "list"
   api_name            = azurerm_api_management_api.this.name
   api_management_name = azurerm_api_management_api.this.api_management_name
-  resource_group_name = var.ResourceGroupName
+  resource_group_name = var.resource_group_name
   display_name        = "Get User Sandboxes"
   method              = "GET"
   url_template        = "/list"
@@ -181,7 +181,7 @@ resource "azurerm_api_management_api_operation" "delete" {
   operation_id        = "delete"
   api_name            = azurerm_api_management_api.this.name
   api_management_name = azurerm_api_management_api.this.api_management_name
-  resource_group_name = var.ResourceGroupName
+  resource_group_name = var.resource_group_name
   display_name        = "Delete User Sandboxes"
   method              = "POST"
   url_template        = "/delete"
@@ -195,7 +195,7 @@ resource "azurerm_api_management_api_operation" "reset" {
   operation_id        = "reset"
   api_name            = azurerm_api_management_api.this.name
   api_management_name = azurerm_api_management_api.this.api_management_name
-  resource_group_name = var.ResourceGroupName
+  resource_group_name = var.resource_group_name
   display_name        = "Reset User Sandboxes"
   method              = "POST"
   url_template        = "/reset"

@@ -1,16 +1,16 @@
 resource "azurerm_service_plan" "temp" {
-  name                = var.ServicePlanFEName
-  resource_group_name = var.ResourceGroupName
-  location            = var.location
+  name                = var.app_service_plan_frontend_name
+  resource_group_name = var.resource_group_name
+  location            = var.region
 
   os_type  = "Windows"
   sku_name = "B1"
 }
 
 resource "azurerm_windows_web_app" "this" {
-  name                = var.WebAppName
-  resource_group_name = var.ResourceGroupName
-  location            = var.location
+  name                = var.web_app_name
+  resource_group_name = var.resource_group_name
+  location            = var.region
   service_plan_id     = azurerm_service_plan.temp.id
 
   app_settings = {
@@ -39,9 +39,9 @@ resource "null_resource" "frontend_publish" {
     New-Item -Path .env -force
     Add-Content -Path .env -Value "REACT_APP_redirectUri=https://${azurerm_windows_web_app.this.default_hostname}"
     Add-Content -Path .env -Value "REACT_APP_clientID=${var.FrontendAppID}"
-    Add-Content -Path .env -Value "REACT_APP_TenantID=${var.AzureADTenantID}"
-    Add-Content -Path .env -Value "REACT_APP_SandboxSubscription=${var.SandboxSubID}"
-    Add-Content -Path .env -Value "REACT_APP_APIMName=${var.APIMGatewayURL}"
+    Add-Content -Path .env -Value "REACT_APP_TenantID=${var.azuread_tenant_id}"
+    Add-Content -Path .env -Value "REACT_APP_SandboxSubscription=${var.sandbox_azure_subscription_id}"
+    Add-Content -Path .env -Value "REACT_APP_api_management_name=${var.APIMGatewayURL}"
     Add-Content -Path .env -Value "REACT_APP_APIName=${var.APIName}"
     Add-Content -Path .env -Value "REACT_APP_APICreate=${var.APICreateURL}"
     Add-Content -Path .env -Value "REACT_APP_APIList=${var.APIListURL}"
@@ -51,23 +51,23 @@ resource "null_resource" "frontend_publish" {
     npm install
     npm run build
     Compress-Archive -Path build\* -DestinationPath ../../Temp/frontendbuild.zip -force
-    az webapp deployment source config-zip --resource-group ${var.ResourceGroupName} --name ${azurerm_windows_web_app.this.name} --src ../../Temp/frontendbuild.zip --only-show-errors > ../../Temp/frontendoutput.txt
+    az webapp deployment source config-zip --resource-group ${var.resource_group_name} --name ${azurerm_windows_web_app.this.name} --src ../../Temp/frontendbuild.zip --only-show-errors > ../../Temp/frontendoutput.txt
     EOT
 
     interpreter = ["PowerShell", "-Command"]
   }
   triggers = {
-    input_json     = filemd5(data.archive_file.frontend_app_code.output_path)
-    deploy_target  = azurerm_windows_web_app.this.id
-    webapphostname = azurerm_windows_web_app.this.default_hostname
-    clientid       = var.FrontendAppID
-    APIMName       = var.APIMGatewayURL
-    tenantid       = var.AzureADTenantID
-    sandboxsubid   = var.SandboxSubID
-    APIName        = var.APIName
-    createurl      = var.APICreateURL
-    listurl        = var.APIListURL
-    deleteurl      = var.APIDeleteURL
-    reseturl       = var.APIResetURL
+    input_json                    = filemd5(data.archive_file.frontend_app_code.output_path)
+    deploy_target                 = azurerm_windows_web_app.this.id
+    webapphostname                = azurerm_windows_web_app.this.default_hostname
+    clientid                      = var.FrontendAppID
+    api_management_name           = var.APIMGatewayURL
+    tenantid                      = var.azuread_tenant_id
+    sandbox_azure_subscription_id = var.sandbox_azure_subscription_id
+    APIName                       = var.APIName
+    createurl                     = var.APICreateURL
+    listurl                       = var.APIListURL
+    deleteurl                     = var.APIDeleteURL
+    reseturl                      = var.APIResetURL
   }
 }

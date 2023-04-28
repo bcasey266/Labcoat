@@ -1,7 +1,7 @@
 resource "azurerm_virtual_network" "this" {
-  name                = var.VNETName
-  location            = var.location
-  resource_group_name = var.ResourceGroupName
+  name                = var.vnet_name
+  location            = var.region
+  resource_group_name = var.resource_group_name
   address_space       = ["10.0.0.0/24"]
 
 }
@@ -43,20 +43,20 @@ resource "azurerm_private_dns_zone_virtual_network_link" "keyvaultlink" {
 }
 
 resource "azurerm_private_endpoint" "keyvault" {
-  name                = "${var.KeyVaultName}-pe"
-  location            = var.location
+  name                = "${var.key_vault_name}-pe"
+  location            = var.region
   resource_group_name = azurerm_virtual_network.this.resource_group_name
   subnet_id           = azurerm_subnet.privateendpoint.id
 
   private_service_connection {
-    name                           = "${var.KeyVaultName}-pe"
+    name                           = "${var.key_vault_name}-pe"
     private_connection_resource_id = var.KeyVaultID
     subresource_names              = ["vault"]
     is_manual_connection           = false
   }
 
   private_dns_zone_group {
-    name                 = "${var.KeyVaultName}-pe"
+    name                 = "${var.key_vault_name}-pe"
     private_dns_zone_ids = ["${azurerm_private_dns_zone.keyvault.id}"]
   }
 }
@@ -75,20 +75,20 @@ resource "azurerm_private_dns_zone_virtual_network_link" "tablelink" {
 }
 
 resource "azurerm_private_endpoint" "sandboxmgmtstoragetable" {
-  name                = "${var.StorageAccountName}-table-pe"
-  location            = var.location
+  name                = "${var.storage_account_name}-table-pe"
+  location            = var.region
   resource_group_name = azurerm_virtual_network.this.resource_group_name
   subnet_id           = azurerm_subnet.privateendpoint.id
 
   private_service_connection {
-    name                           = "${var.StorageAccountName}-table-pe"
+    name                           = "${var.storage_account_name}-table-pe"
     private_connection_resource_id = var.StorageAccountID
     subresource_names              = ["table"]
     is_manual_connection           = false
   }
 
   private_dns_zone_group {
-    name                 = "${var.StorageAccountName}-table-pe"
+    name                 = "${var.storage_account_name}-table-pe"
     private_dns_zone_ids = ["${azurerm_private_dns_zone.table.id}"]
   }
 }
@@ -107,20 +107,20 @@ resource "azurerm_private_dns_zone_virtual_network_link" "bloblink" {
 }
 
 resource "azurerm_private_endpoint" "sandboxmgmtstorageblob" {
-  name                = "${var.StorageAccountName}-blob-pe"
-  location            = var.location
+  name                = "${var.storage_account_name}-blob-pe"
+  location            = var.region
   resource_group_name = azurerm_virtual_network.this.resource_group_name
   subnet_id           = azurerm_subnet.privateendpoint.id
 
   private_service_connection {
-    name                           = "${var.StorageAccountName}-blob-pe"
+    name                           = "${var.storage_account_name}-blob-pe"
     private_connection_resource_id = var.StorageAccountID
     subresource_names              = ["blob"]
     is_manual_connection           = false
   }
 
   private_dns_zone_group {
-    name                 = "${var.StorageAccountName}-blob-pe"
+    name                 = "${var.storage_account_name}-blob-pe"
     private_dns_zone_ids = ["${azurerm_private_dns_zone.blob.id}"]
   }
 }
@@ -139,20 +139,20 @@ resource "azurerm_private_dns_zone_virtual_network_link" "filelink" {
 }
 
 resource "azurerm_private_endpoint" "sandboxmgmtstoragefile" {
-  name                = "${var.StorageAccountName}-file-pe"
-  location            = var.location
+  name                = "${var.storage_account_name}-file-pe"
+  location            = var.region
   resource_group_name = azurerm_virtual_network.this.resource_group_name
   subnet_id           = azurerm_subnet.privateendpoint.id
 
   private_service_connection {
-    name                           = "${var.StorageAccountName}-file-pe"
+    name                           = "${var.storage_account_name}-file-pe"
     private_connection_resource_id = var.StorageAccountID
     subresource_names              = ["file"]
     is_manual_connection           = false
   }
 
   private_dns_zone_group {
-    name                 = "${var.StorageAccountName}-file-pe"
+    name                 = "${var.storage_account_name}-file-pe"
     private_dns_zone_ids = ["${azurerm_private_dns_zone.file.id}"]
   }
 }
@@ -171,20 +171,20 @@ resource "azurerm_private_dns_zone_virtual_network_link" "queuelink" {
 }
 
 resource "azurerm_private_endpoint" "sandboxmgmtstoragequeue" {
-  name                = "${var.StorageAccountName}-queue-pe"
-  location            = var.location
+  name                = "${var.storage_account_name}-queue-pe"
+  location            = var.region
   resource_group_name = azurerm_virtual_network.this.resource_group_name
   subnet_id           = azurerm_subnet.privateendpoint.id
 
   private_service_connection {
-    name                           = "${var.StorageAccountName}-queue-pe"
+    name                           = "${var.storage_account_name}-queue-pe"
     private_connection_resource_id = var.StorageAccountID
     subresource_names              = ["queue"]
     is_manual_connection           = false
   }
 
   private_dns_zone_group {
-    name                 = "${var.StorageAccountName}-queue-pe"
+    name                 = "${var.storage_account_name}-queue-pe"
     private_dns_zone_ids = ["${azurerm_private_dns_zone.queue.id}"]
   }
 }

@@ -1,20 +1,20 @@
-variable "location" {
+variable "region" {
   type        = string
   description = "The azure region to place resources in"
   default     = "eastus"
 }
 
-variable "ResourceGroupName" {
+variable "resource_group_name" {
   type        = string
   description = "Resource Group Name for ASAP that contains the platform level resources"
 }
 
-variable "ServicePlanFEName" {
+variable "app_service_plan_frontend_name" {
   type        = string
   description = "Resource Group Name for ASAP that contains the platform level resources"
 }
 
-variable "WebAppName" {
+variable "web_app_name" {
   type        = string
   description = "Resource Group Name for ASAP that contains the platform level resources"
 }
@@ -24,12 +24,12 @@ variable "FrontendAppID" {
   description = "Resource Group Name for ASAP that contains the platform level resources"
 }
 
-variable "AzureADTenantID" {
+variable "azuread_tenant_id" {
   type        = string
   description = "Resource Group Name for ASAP that contains the platform level resources"
 }
 
-variable "SandboxSubID" {
+variable "sandbox_azure_subscription_id" {
   type        = string
   description = "Resource Group Name for ASAP that contains the platform level resources"
 }

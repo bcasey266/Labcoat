@@ -2,14 +2,14 @@ resource "azapi_resource" "queueapiconnection" {
   type                      = "Microsoft.Web/connections@2016-06-01"
   schema_validation_enabled = false
   name                      = "queue"
-  location                  = var.location
+  location                  = var.region
   parent_id                 = var.ResourceGroupID
   body = jsonencode({
     properties = {
       api = {
         name        = "azurequeues",
         displayName = "Azure Queues",
-        id          = "/subscriptions/${var.SandboxManagementSubscription}/providers/Microsoft.Web/locations/${var.location}/managedApis/azurequeues",
+        id          = "/subscriptions/${var.SandboxManagementSubscription}/providers/Microsoft.Web/locations/${var.region}/managedApis/azurequeues",
         type        = "Microsoft.Web/locations/managedApis"
       }
       parameterValueSet = {
@@ -24,14 +24,14 @@ resource "azapi_resource" "office365apiconnection" {
   type                      = "Microsoft.Web/connections@2016-06-01"
   schema_validation_enabled = false
   name                      = "office365"
-  location                  = var.location
+  location                  = var.region
   parent_id                 = var.ResourceGroupID
   body = jsonencode({
     properties = {
       api = {
         name        = "office365",
         displayName = "Office 365 Outlook",
-        id          = "/subscriptions/${var.SandboxManagementSubscription}/providers/Microsoft.Web/locations/${var.location}/managedApis/office365",
+        id          = "/subscriptions/${var.SandboxManagementSubscription}/providers/Microsoft.Web/locations/${var.region}/managedApis/office365",
         type        = "Microsoft.Web/locations/managedApis"
       }
     }
@@ -40,9 +40,9 @@ resource "azapi_resource" "office365apiconnection" {
 }
 
 resource "azurerm_logic_app_workflow" "this" {
-  name                = var.LogicAppName
-  location            = var.location
-  resource_group_name = var.ResourceGroupName
+  name                = var.logic_app_name
+  location            = var.region
+  resource_group_name = var.resource_group_name
   identity {
     type = "SystemAssigned"
   }
@@ -75,7 +75,7 @@ resource "azurerm_logic_app_workflow" "this" {
       "type" : "String"
     }),
     "SandboxSubscription" : jsonencode({
-      "defaultValue" : "${var.SandboxSubID}",
+      "defaultValue" : "${var.sandbox_azure_subscription_id}",
       "type" : "String"
     })
   }
@@ -83,7 +83,7 @@ resource "azurerm_logic_app_workflow" "this" {
 
 resource "azurerm_storage_queue" "notification" {
   name                 = "sandboxnotification"
-  storage_account_name = var.StorageAccountName
+  storage_account_name = var.storage_account_name
 }
 
 resource "azurerm_role_assignment" "logicappQueueContributor" {
@@ -104,7 +104,7 @@ resource "azurerm_logic_app_trigger_custom" "this" {
         }
       },
       "method" : "get",
-      "path" : "/v2/storageAccounts/@{encodeURIComponent(encodeURIComponent('${var.StorageAccountName}'))}/queues/@{encodeURIComponent('${azurerm_storage_queue.notification.name}')}/message_trigger"
+      "path" : "/v2/storageAccounts/@{encodeURIComponent(encodeURIComponent('${var.storage_account_name}'))}/queues/@{encodeURIComponent('${azurerm_storage_queue.notification.name}')}/message_trigger"
     },
     "recurrence" : {
       "frequency" : "Minute",
@@ -357,7 +357,7 @@ resource "azurerm_logic_app_action_custom" "deletemessage" {
         }
       },
       "method" : "delete",
-      "path" : "/v2/storageAccounts/@{encodeURIComponent(encodeURIComponent('${var.StorageAccountName}'))}/queues/@{encodeURIComponent('${azurerm_storage_queue.notification.name}')}/messages/@{encodeURIComponent(triggerBody()?['MessageId'])}",
+      "path" : "/v2/storageAccounts/@{encodeURIComponent(encodeURIComponent('${var.storage_account_name}'))}/queues/@{encodeURIComponent('${azurerm_storage_queue.notification.name}')}/messages/@{encodeURIComponent(triggerBody()?['MessageId'])}",
 
       "queries" : {
         "popreceipt" : "@triggerBody()?['PopReceipt']"

@@ -1,123 +1,145 @@
-### General Variables
-variable "location" {
+variable "region" {
+  description = "The primary Azure region that the management resources will be placed in."
   type        = string
-  description = "The azure region to place resources in"
   default     = "eastus"
 }
 
-variable "SandboxSubID" {
+variable "sandbox_azure_subscription_id" {
+  description = "The Azure Subscription ID that will host the Sandbox Resource Groups."
   type        = string
-  description = "The Subscription ID of the Sandbox Subscription"
+  default     = ""
 }
 
-variable "AzureADTenantID" {
+variable "azuread_tenant_id" {
+  description = "The Azure AD Tenant ID that is connected to the Sandbox Subscriptions."
   type        = string
-  description = "The Azure AD Tenant ID is utilized to create and manage App APIs"
+  default     = ""
 }
 
-variable "AdminIPs" {
-  type        = list(any)
-  description = "List of Admin IPs"
+variable "ip_allowlist" {
+  description = "List of Public IPs that should be allowed to communicate with Azure Resources"
+  type = list(object({
+    name     = string
+    ip       = string
+    cidr     = number
+    priority = number
+  }))
+  default = [{
+    cidr     = 32
+    ip       = ""
+    name     = ""
+    priority = 1
+  }]
 }
 
-### management.tf Variables
-variable "ResourceGroupName" {
+variable "resource_group_name" {
+  description = "The name of the Resource Group that will hold the Sandbox Platform Management Resources"
   type        = string
-  description = "Resource Group Name for ASAP that contains the platform level resources"
+  default     = ""
 }
 
-variable "KeyVaultName" {
+variable "key_vault_name" {
+  description = "The name of the Azure Key Vault used to store Platform level secrets"
   type        = string
-  description = "Key Vault Name for ASAP to host secrets"
+  default     = ""
 
   validation {
-    condition     = can(regex("[a-z0-9]+([-]?[a-z0-9]){3,24}", var.KeyVaultName))
+    condition     = can(regex("[a-zA-Z0-9]+([-]?[a-zA-Z0-9]){3,24}", var.key_vault_name))
+    error_message = "Azure Key Vaults can only contain up to 24 Alphanumerics and hyphens"
+  }
+}
+
+variable "storage_account_name" {
+  description = "The name of the Storage Account used to host the Tables, Queues, and Code for Sandbox Platform Management"
+  type        = string
+  default     = ""
+
+  validation {
+    condition     = can(regex("[a-z0-9]+([-]?[a-z0-9]){2,63}", var.storage_account_name))
     error_message = "Storage Accounts can only contain lowercase characters and numbers"
   }
 }
 
-variable "StorageAccountName" {
+variable "log_analytics_name" {
+  description = "The name of the Log Analytics Workspace used for centralized logging"
   type        = string
-  description = "Storage Account Name for ASAP to host Tables and Queues"
-
-  validation {
-    condition     = can(regex("[a-z0-9]+([-]?[a-z0-9]){2,63}", var.StorageAccountName))
-    error_message = "Storage Accounts can only contain lowercase characters and numbers"
-  }
+  default     = ""
 }
 
-variable "LogAnalyticsName" {
+variable "application_insights_name" {
+  description = "The name of the Application Insights resource used for centralized logging"
   type        = string
-  description = "Log Analytics Name for ASAP for logging"
+  default     = ""
 }
 
-variable "ApplicationInsightsName" {
-  type        = string
-  description = "Application Insights Workspace Name for ASAP for logging"
+variable "enable_private_networking" {
+  description = "If enabled, a Virtual Network will be created and all resources will be connected through Private Endpoints instead of communicating publicly"
+  type        = bool
+  default     = true
 }
 
-### network.tf Variables
-variable "PrivateNetworking" {
-  type = bool
+variable "vnet_name" {
+  description = "Name of the VNET that will be created if enable_private_networking is enabled"
+  type        = string
+  default     = ""
 }
 
-variable "VNETName" {
+variable "app_service_plan_name" {
+  description = "The name of the App Service Plan that will host the Fuctions used to manage the platform"
   type        = string
-  description = "VNET Name for ASAP"
+  default     = ""
 }
 
-### compute.tf Variables
-variable "ServicePlanName" {
+variable "function_app_name" {
+  description = "The name of the Function App that hosts the Functions for the platform"
   type        = string
-  description = "App Service Plan Name for ASAP"
+  default     = ""
 }
 
-variable "FunctionAppName" {
+variable "app_service_plan_frontend_name" {
+  description = "The name of the App Service Plan that hosts the ASAP Portal. This is different due to a difference in SKU and compatibility problems."
   type        = string
-  description = "Function App Name for ASAP"
+  default     = ""
 }
 
-### frontend.tf Variables
-variable "ServicePlanFEName" {
+variable "web_app_name" {
+  description = "The name of the Web App resource that hosts the frontend portal"
   type        = string
-  description = "App Service Plan Frontend Name for ASAP"
+  default     = ""
 }
 
-variable "WebAppName" {
-  type        = string
-  description = "Web App Name for ASAP"
-}
-
-### APIM.tf Variables
-variable "APIMName" {
-  type        = string
+variable "api_management_name" {
   description = "Azure APIM Name for ASAP"
+  type        = string
+  default     = ""
 }
 
-variable "APIMPublisherName" {
+variable "api_management_admin_name" {
+  description = "The name of a person or service account that is registered to the APIM resource"
   type        = string
-  description = "The admin's name in charge of APIM"
+  default     = ""
 }
 
-variable "APIMPublisherEmail" {
+variable "api_management_admin_email" {
+  description = "The email of a person or service account that is registered to the APIM resource"
   type        = string
-  description = "The admin's email in charge of APIM"
+  default     = ""
 }
 
-### azuread.tf Variables
-variable "FrontendApp" {
+variable "frontend_app_registration_name" {
+  description = "The name of the Azure AD App Registration for the Frontend Portal"
   type        = string
-  description = "Frontend Azure AD App Registration Name"
+  default     = ""
 }
 
-### logicapp.tf Variables
-variable "LogicAppName" {
+variable "logic_app_name" {
+  description = "The name of the Logic App resource used for notifications"
   type        = string
-  description = "Azure Logic App Name for ASAP"
+  default     = ""
 }
 
-variable "LogicAppLocation" {
+variable "logic_app_region" {
+  description = "The region that hosts the Logic App. This is different due to allowlist restrictions on the Storage Account"
   type        = string
-  description = "The azure region to place resources in"
   default     = "eastus2"
 }
