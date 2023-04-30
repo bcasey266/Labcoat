@@ -2,14 +2,14 @@ resource "azapi_resource" "queueapiconnection" {
   type                      = "Microsoft.Web/connections@2016-06-01"
   schema_validation_enabled = false
   name                      = "queue"
-  location                  = var.LogicAppLocation
-  parent_id                 = azurerm_resource_group.this.id
+  location                  = var.logic_app_region
+  parent_id                 = var.resource_group_id
   body = jsonencode({
     properties = {
       api = {
         name        = "azurequeues",
         displayName = "Azure Queues",
-        id          = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/providers/Microsoft.Web/locations/${var.LogicAppLocation}/managedApis/azurequeues",
+        id          = "/subscriptions/${var.platform_subscription_id}/providers/Microsoft.Web/locations/${var.logic_app_region}/managedApis/azurequeues",
         type        = "Microsoft.Web/locations/managedApis"
       }
       parameterValueSet = {
@@ -24,14 +24,14 @@ resource "azapi_resource" "office365apiconnection" {
   type                      = "Microsoft.Web/connections@2016-06-01"
   schema_validation_enabled = false
   name                      = "office365"
-  location                  = var.LogicAppLocation
-  parent_id                 = azurerm_resource_group.this.id
+  location                  = var.logic_app_region
+  parent_id                 = var.resource_group_id
   body = jsonencode({
     properties = {
       api = {
         name        = "office365",
         displayName = "Office 365 Outlook",
-        id          = "/subscriptions/${data.azurerm_client_config.current.subscription_id}/providers/Microsoft.Web/locations/${var.LogicAppLocation}/managedApis/office365",
+        id          = "/subscriptions/${var.platform_subscription_id}/providers/Microsoft.Web/locations/${var.logic_app_region}/managedApis/office365",
         type        = "Microsoft.Web/locations/managedApis"
       }
     }
@@ -40,9 +40,9 @@ resource "azapi_resource" "office365apiconnection" {
 }
 
 resource "azurerm_logic_app_workflow" "this" {
-  name                = var.LogicAppName
-  location            = var.LogicAppLocation
-  resource_group_name = azurerm_resource_group.this.name
+  name                = var.logic_app_name
+  location            = var.logic_app_region
+  resource_group_name = var.resource_group_name
   identity {
     type = "SystemAssigned"
   }
@@ -71,11 +71,11 @@ resource "azurerm_logic_app_workflow" "this" {
       type         = "Object"
     }),
     "frontend" : jsonencode({
-      "defaultValue" : "https://${azurerm_windows_web_app.this.default_hostname}/",
+      "defaultValue" : "https://${var.frontend_url}/",
       "type" : "String"
     }),
     "SandboxSubscription" : jsonencode({
-      "defaultValue" : "${var.SandboxSubID}",
+      "defaultValue" : "${var.sandbox_azure_subscription_id}",
       "type" : "String"
     })
   }
@@ -83,11 +83,11 @@ resource "azurerm_logic_app_workflow" "this" {
 
 resource "azurerm_storage_queue" "notification" {
   name                 = "sandboxnotification"
-  storage_account_name = azurerm_storage_account.this.name
+  storage_account_name = var.storage_account_name
 }
 
 resource "azurerm_role_assignment" "logicappQueueContributor" {
-  scope                = azurerm_storage_account.this.id
+  scope                = var.storage_account_id
   role_definition_name = "Storage Queue Data Contributor"
   principal_id         = azurerm_logic_app_workflow.this.identity[0].principal_id
 }
@@ -104,7 +104,7 @@ resource "azurerm_logic_app_trigger_custom" "this" {
         }
       },
       "method" : "get",
-      "path" : "/v2/storageAccounts/@{encodeURIComponent(encodeURIComponent('${azurerm_storage_account.this.name}'))}/queues/@{encodeURIComponent('${azurerm_storage_queue.notification.name}')}/message_trigger"
+      "path" : "/v2/storageAccounts/@{encodeURIComponent(encodeURIComponent('${var.storage_account_name}'))}/queues/@{encodeURIComponent('${azurerm_storage_queue.notification.name}')}/message_trigger"
     },
     "recurrence" : {
       "frequency" : "Minute",
@@ -183,7 +183,7 @@ resource "azurerm_logic_app_action_custom" "newsandboxvariable" {
         {
           "name"  = "newsandboxvariable",
           "type"  = "string",
-          "value" = "${file("CommunicationCode/new.html")}"
+          "value" = "${file("../App/EmailTemplate/new.html")}"
         }
       ]
     },
@@ -206,7 +206,7 @@ resource "azurerm_logic_app_action_custom" "deletesandboxvariable" {
         {
           "name"  = "deletesandboxvariable",
           "type"  = "string",
-          "value" = "${file("CommunicationCode/delete.html")}"
+          "value" = "${file("../App/EmailTemplate/delete.html")}"
         }
       ]
     },
@@ -229,7 +229,7 @@ resource "azurerm_logic_app_action_custom" "statussandboxvariable" {
         {
           "name"  = "statussandboxvariable",
           "type"  = "string",
-          "value" = "${file("CommunicationCode/status.html")}"
+          "value" = "${file("../App/EmailTemplate/status.html")}"
         }
       ]
     },
@@ -357,7 +357,7 @@ resource "azurerm_logic_app_action_custom" "deletemessage" {
         }
       },
       "method" : "delete",
-      "path" : "/v2/storageAccounts/@{encodeURIComponent(encodeURIComponent('${azurerm_storage_account.this.name}'))}/queues/@{encodeURIComponent('${azurerm_storage_queue.notification.name}')}/messages/@{encodeURIComponent(triggerBody()?['MessageId'])}",
+      "path" : "/v2/storageAccounts/@{encodeURIComponent(encodeURIComponent('${var.storage_account_name}'))}/queues/@{encodeURIComponent('${azurerm_storage_queue.notification.name}')}/messages/@{encodeURIComponent(triggerBody()?['MessageId'])}",
 
       "queries" : {
         "popreceipt" : "@triggerBody()?['PopReceipt']"
@@ -370,8 +370,4 @@ resource "azurerm_logic_app_action_custom" "deletemessage" {
     },
     "type" : "ApiConnection"
   })
-}
-
-output "Authorize" {
-  value = "Please authorize the Logic App Office 365 Connection here: https://portal.azure.com/#@${data.azuread_client_config.current.tenant_id}/resource${azapi_resource.office365apiconnection.id}/edit"
 }

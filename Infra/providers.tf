@@ -9,25 +9,24 @@ terraform {
       version = "2.37.2"
     }
     azapi = {
-      source  = "Azure/azapi"
+      source  = "azure/azapi"
       version = "1.5.0"
     }
   }
   backend "azurerm" {
-    resource_group_name  = "ASAPBackend"
-    storage_account_name = "asapbackend"
-    container_name       = "tfstate"
-    key                  = "asap30.terraform.tfstate"
-    use_azuread_auth     = true
   }
 }
 
 provider "azurerm" {
-  features {}
+  features {
+    key_vault {
+      recover_soft_deleted_secrets = true
+    }
+  }
 }
 
 provider "azuread" {
-  tenant_id = var.AzureADTenantID
+  tenant_id = var.azuread_tenant_id
 }
 
 provider "azapi" {
