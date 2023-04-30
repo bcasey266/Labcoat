@@ -1,14 +1,16 @@
-resource "random_uuid" "frontendapp" {}
+resource "random_uuid" "this" {}
 
 data "azuread_client_config" "current" {}
 
 data "azurerm_function_app_host_keys" "deploykeys" {
-  name                = azurerm_windows_function_app.this.name
+  depends_on = [var.function_app_name]
+
+  name                = var.function_app_name
   resource_group_name = var.resource_group_name
 }
 
 
-resource "azuread_application" "frontendapp" {
+resource "azuread_application" "this" {
   display_name     = var.frontend_app_registration_name
   identifier_uris  = ["api://${var.frontend_app_registration_name}"]
   owners           = [data.azuread_client_config.current.object_id]
@@ -17,16 +19,16 @@ resource "azuread_application" "frontendapp" {
   api {
     requested_access_token_version = 2
     oauth2_permission_scope {
-      admin_consent_description  = "Allow App to Read AD"
+      admin_consent_description  = "Allow the ASAP Portal to Read AD"
       admin_consent_display_name = "Consent Acknowledgement"
       enabled                    = true
-      id                         = random_uuid.frontendapp.result
+      id                         = random_uuid.this.result
       type                       = "User"
       value                      = "Sandbox.Create"
     }
   }
   single_page_application {
-    redirect_uris = ["http://localhost:3000/", "https://${var.FrontendHostname}/"]
+    redirect_uris = ["http://localhost:3000/", "https://${var.frontend_host_name}/"]
   }
   required_resource_access {
     resource_app_id = "00000003-0000-0000-c000-000000000000"
@@ -50,19 +52,20 @@ resource "azuread_application" "frontendapp" {
   }
 }
 
-resource "azuread_application_pre_authorized" "frontendapp" {
-  application_object_id = azuread_application.frontend_app_registration_name.object_id
-  authorized_app_id     = azuread_application.frontend_app_registration_name.application_id
-  permission_ids        = [random_uuid.frontendapp.result]
+resource "azuread_application_pre_authorized" "this" {
+  application_object_id = azuread_application.this.object_id
+  authorized_app_id     = azuread_application.this.application_id
+  permission_ids        = [random_uuid.this.result]
 }
 
 resource "azurerm_api_management" "this" {
   name                = var.api_management_name
   location            = var.region
   resource_group_name = var.resource_group_name
-  sku_name            = "Consumption_0"
-  publisher_name      = var.api_management_admin_name
-  publisher_email     = var.api_management_admin_email
+
+  sku_name        = "Consumption_0"
+  publisher_name  = var.api_management_admin_name
+  publisher_email = var.api_management_admin_email
 
   identity {
     type = "SystemAssigned"
@@ -72,19 +75,21 @@ resource "azurerm_api_management" "this" {
 resource "azurerm_api_management_backend" "this" {
   name                = var.function_app_name
   resource_group_name = var.resource_group_name
+
   api_management_name = azurerm_api_management.this.name
   protocol            = "http"
-  url                 = "https://${var.FunctionAppHostName}/api"
+  url                 = "https://${var.function_app_host_name}/api"
   credentials {
     header = {
-      "x-functions-key" = var.FunctionAppHostKey
+      "x-functions-key" = var.function_app_host_key
     }
   }
 }
 
 resource "azurerm_api_management_api" "this" {
-  name                  = "sandbox"
-  resource_group_name   = var.resource_group_name
+  name                = "sandbox"
+  resource_group_name = var.resource_group_name
+
   api_management_name   = azurerm_api_management.this.name
   revision              = 1
   display_name          = "sandbox"
@@ -104,7 +109,7 @@ resource "azurerm_api_management_api_policy" "this" {
         <cors allow-credentials="true">
             <allowed-origins>
                 <origin>http://localhost:3000/</origin>
-                <origin>https://${var.FunctionAppHostName}/</origin>
+                <origin>https://${var.function_app_host_name}/</origin>
             </allowed-origins>
             <allowed-methods preflight-result-max-age="300">
                 <method>GET</method>
@@ -120,7 +125,7 @@ resource "azurerm_api_management_api_policy" "this" {
             <openid-config url="https://login.microsoftonline.com/${var.azuread_tenant_id}/v2.0/.well-known/openid-configuration" />
             <required-claims>
                 <claim name="aud">
-                    <value>${azuread_application.frontend_app_registration_name.application_id}</value>
+                    <value>${azuread_application.this.application_id}</value>
                 </claim>
             </required-claims>
         </validate-jwt>

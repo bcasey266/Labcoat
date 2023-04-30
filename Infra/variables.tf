@@ -93,15 +93,15 @@ variable "vnet_name" {
 variable "vnet_ip_space" {
   description = "VNET IP configurations to host WebApp VNET Integration and Private Endpoints"
   type = object({
-    vnetcidr            = string
-    privateendpointcidr = string
-    vnetintegrationcidr = string
+    vnetcidr            = list(string)
+    privateendpointcidr = list(string)
+    vnetintegrationcidr = list(string)
   })
-  default = [{
-    vnetcidr            = "10.0.0.0/24"
-    privateendpointcidr = "10.0.0.64/27"
-    vnetintegrationcidr = "10.0.0.96/27"
-  }]
+  default = ({
+    vnetcidr            = ["10.0.0.0/24"]
+    privateendpointcidr = ["10.0.0.64/27"]
+    vnetintegrationcidr = ["10.0.0.96/27"]
+  })
 }
 
 variable "app_service_plan_name" {

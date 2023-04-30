@@ -1,7 +1,7 @@
-resource "azurerm_service_plan" "temp" {
+resource "azurerm_service_plan" "this" {
   name                = var.app_service_plan_frontend_name
-  resource_group_name = var.resource_group_name
   location            = var.region
+  resource_group_name = var.resource_group_name
 
   os_type  = "Windows"
   sku_name = "B1"
@@ -9,9 +9,10 @@ resource "azurerm_service_plan" "temp" {
 
 resource "azurerm_windows_web_app" "this" {
   name                = var.web_app_frontend_name
-  resource_group_name = var.resource_group_name
   location            = var.region
-  service_plan_id     = azurerm_service_plan.temp.id
+  resource_group_name = var.resource_group_name
+
+  service_plan_id = azurerm_service_plan.this.id
 
   app_settings = {
     "WEBSITE_RUN_FROM_PACKAGE" = "1"
@@ -25,28 +26,28 @@ resource "azurerm_windows_web_app" "this" {
   }
 }
 
-data "archive_file" "frontend_app_code" {
+data "archive_file" "this" {
   type        = "zip"
   source_dir  = "../App/FrontendPortal"
   output_path = "../Temp/frontendportal.zip"
   excludes    = ["build", "node_modules", ".env", ".env.development"]
 }
 
-resource "null_resource" "frontend_publish" {
+resource "null_resource" "this" {
   provisioner "local-exec" {
     command = <<-EOT
     cd ../App/FrontendPortal
     New-Item -Path .env -force
     Add-Content -Path .env -Value "REACT_APP_redirectUri=https://${azurerm_windows_web_app.this.default_hostname}"
-    Add-Content -Path .env -Value "REACT_APP_clientID=${var.FrontendAppID}"
+    Add-Content -Path .env -Value "REACT_APP_clientID=${var.frontend_app_id}"
     Add-Content -Path .env -Value "REACT_APP_TenantID=${var.azuread_tenant_id}"
     Add-Content -Path .env -Value "REACT_APP_SandboxSubscription=${var.sandbox_azure_subscription_id}"
-    Add-Content -Path .env -Value "REACT_APP_api_management_name=${var.APIMGatewayURL}"
-    Add-Content -Path .env -Value "REACT_APP_APIName=${var.APIName}"
-    Add-Content -Path .env -Value "REACT_APP_APICreate=${var.APICreateURL}"
-    Add-Content -Path .env -Value "REACT_APP_APIList=${var.APIListURL}"
-    Add-Content -Path .env -Value "REACT_APP_APIDelete=${var.APIDeleteURL}"
-    Add-Content -Path .env -Value "REACT_APP_APIReset=${var.APIResetURL}"
+    Add-Content -Path .env -Value "REACT_APP_api_management_name=${var.api_management_gateway_url}"
+    Add-Content -Path .env -Value "REACT_APP_APIName=${var.api_name}"
+    Add-Content -Path .env -Value "REACT_APP_APICreate=${var.api_create_url}"
+    Add-Content -Path .env -Value "REACT_APP_APIList=${var.api_list_url}"
+    Add-Content -Path .env -Value "REACT_APP_APIDelete=${var.api_delete_url}"
+    Add-Content -Path .env -Value "REACT_APP_APIReset=${var.api_reset_url}"
 
     npm install
     npm run build
@@ -57,17 +58,17 @@ resource "null_resource" "frontend_publish" {
     interpreter = ["PowerShell", "-Command"]
   }
   triggers = {
-    input_json                    = filemd5(data.archive_file.frontend_app_code.output_path)
+    input_json                    = filemd5(data.archive_file.this.output_path)
     deploy_target                 = azurerm_windows_web_app.this.id
     webapphostname                = azurerm_windows_web_app.this.default_hostname
-    clientid                      = var.FrontendAppID
-    api_management_name           = var.APIMGatewayURL
+    clientid                      = var.frontend_app_id
+    api_management_name           = var.api_management_gateway_url
     tenantid                      = var.azuread_tenant_id
     sandbox_azure_subscription_id = var.sandbox_azure_subscription_id
-    APIName                       = var.APIName
-    createurl                     = var.APICreateURL
-    listurl                       = var.APIListURL
-    deleteurl                     = var.APIDeleteURL
-    reseturl                      = var.APIResetURL
+    APIName                       = var.api_name
+    createurl                     = var.api_create_url
+    listurl                       = var.api_list_url
+    deleteurl                     = var.api_delete_url
+    reseturl                      = var.api_reset_url
   }
 }

@@ -29,7 +29,7 @@ resource "azurerm_key_vault" "this" {
 
   tenant_id                  = var.azuread_tenant_id
   soft_delete_retention_days = 7
-  purge_protection_enabled   = false
+  purge_protection_enabled   = true
   sku_name                   = "standard"
   enable_rbac_authorization  = true
 
@@ -93,8 +93,10 @@ resource "azurerm_role_assignment" "queue_data_contributor" {
   role_definition_name = "Storage Queue Data Contributor"
 }
 
+#tfsec:ignore:azure-keyvault-ensure-secret-expiry
+#tfsec:ignore:azure-keyvault-content-type-for-secret
 resource "azurerm_key_vault_secret" "storage_account_connection_string" {
-  name         = "${var.azurerm_storage_account.this.name}-connection-string"
+  name         = "${azurerm_storage_account.this.name}-connection-string"
   key_vault_id = azurerm_key_vault.this.id
   value        = azurerm_storage_account.this.primary_connection_string
 }
@@ -168,7 +170,7 @@ module "FunctionApp" {
 
   platform_subscription_id      = data.azurerm_client_config.current.subscription_id
   sandbox_azure_subscription_id = var.sandbox_azure_subscription_id
-  frontend_url                  = module.Frontend.FrontendPortalURL
+  frontend_url                  = module.Frontend.frontend_url
 }
 
 module "Notifications" {
@@ -186,40 +188,46 @@ module "Notifications" {
   azuread_tenant_id             = var.azuread_tenant_id
   platform_subscription_id      = data.azurerm_client_config.current.subscription_id
   sandbox_azure_subscription_id = var.sandbox_azure_subscription_id
-  frontend_url                  = module.Frontend.FrontendPortalURL
+  frontend_url                  = module.Frontend.frontend_url
 
 }
 
 module "APIM" {
   source = "./Modules/APIM"
 
-  frontend_app_registration_name = var.frontend_app_registration_name
-  FrontendHostname               = module.Frontend.FrontendHostname
-  region                         = var.logic_app_region
-  resource_group_name            = azurerm_resource_group.this.name
   api_management_name            = var.api_management_name
-  api_management_admin_name      = var.api_management_admin_name
-  api_management_admin_email     = var.api_management_admin_email
-  function_app_name              = var.function_app_name
-  FunctionAppHostName            = module.FunctionApp.FunctionAppHostName
-  FunctionAppHostKey             = module.FunctionApp.FunctionAppHostKey
-  azuread_tenant_id              = var.azuread_tenant_id
+  frontend_app_registration_name = var.frontend_app_registration_name
+  region                         = azurerm_resource_group.this.location
+  resource_group_name            = azurerm_resource_group.this.name
+
+  api_management_admin_name  = var.api_management_admin_name
+  api_management_admin_email = var.api_management_admin_email
+
+  function_app_name      = module.FunctionApp.function_app_name
+  function_app_host_name = module.FunctionApp.function_app_host_name
+  function_app_host_key  = module.FunctionApp.function_app_name
+
+  frontend_host_name = module.Frontend.frontend_host_name
+  azuread_tenant_id  = var.azuread_tenant_id
 }
 
 module "Frontend" {
   source = "./Modules/Frontend"
 
-  region                         = var.logic_app_region
-  resource_group_name            = azurerm_resource_group.this.name
   app_service_plan_frontend_name = var.app_service_plan_frontend_name
   web_app_frontend_name          = var.web_app_frontend_name
-  FrontendAppID                  = module.APIM.FrontendAppID
-  azuread_tenant_id              = var.azuread_tenant_id
-  sandbox_azure_subscription_id  = var.sandbox_azure_subscription_id
-  APIMGatewayURL                 = module.APIM.APIMGatewayURL
-  APIName                        = module.APIM.APIName
-  APICreateURL                   = module.APIM.APICreateURL
-  APIListURL                     = module.APIM.APIListURL
-  APIDeleteURL                   = module.APIM.APIDeleteURL
-  APIResetURL                    = module.APIM.APIResetURL
+  region                         = var.logic_app_region
+  resource_group_name            = azurerm_resource_group.this.name
+
+  api_management_gateway_url = module.APIM.api_management_gateway_url
+  api_name                   = module.APIM.api_name
+  api_create_url             = module.APIM.api_create_url
+  api_list_url               = module.APIM.api_list_url
+  api_delete_url             = module.APIM.api_delete_url
+  api_reset_url              = module.APIM.api_reset_url
+
+  frontend_app_id               = module.APIM.frontend_app_id
+  sandbox_azure_subscription_id = var.sandbox_azure_subscription_id
+  azuread_tenant_id             = var.azuread_tenant_id
+
 }

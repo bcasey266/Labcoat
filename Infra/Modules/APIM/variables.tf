@@ -1,54 +1,65 @@
-variable "frontend_app_registration_name" {
+variable "api_management_name" {
+  description = "Azure APIM Name for ASAP"
   type        = string
-  description = "Frontend Azure AD App Registration Name"
+  default     = ""
+}
+
+variable "frontend_app_registration_name" {
+  description = "The name of the Azure AD App Registration for the Frontend Portal"
+  type        = string
+  default     = ""
 }
 
 variable "region" {
+  description = "The primary Azure region that the management resources will be placed in."
   type        = string
-  description = "The azure region to place resources in"
   default     = "eastus"
 }
 
 variable "resource_group_name" {
+  description = "The name of the Resource Group that will hold the Sandbox Platform Management Resources"
   type        = string
-  description = "Resource Group Name for ASAP that contains the platform level resources"
-}
-
-variable "api_management_name" {
-  type        = string
-  description = "Azure APIM Name for ASAP"
+  default     = ""
 }
 
 variable "api_management_admin_name" {
+  description = "The name of a person or service account that is registered to the APIM resource"
   type        = string
-  description = "The admin's name in charge of APIM"
+  default     = ""
 }
 
 variable "api_management_admin_email" {
+  description = "The email of a person or service account that is registered to the APIM resource"
   type        = string
-  description = "The admin's email in charge of APIM"
+  default     = ""
 }
 
 variable "function_app_name" {
+  description = "The name of the Function App that hosts the Functions for the platform"
   type        = string
-  description = "Function App Name for ASAP"
+  default     = ""
 }
 
-variable "FunctionAppHostName" {
+variable "function_app_host_name" {
+  description = "The host name of the Function App that hosts the Functions for the platform"
   type        = string
-  description = "The admin's email in charge of APIM"
+  default     = ""
 }
 
-variable "FrontendHostname" {
-  type = string
+variable "function_app_host_key" {
+  description = "The host key that authorizes requests to the Function App for the platform"
+  type        = string
+  default     = ""
 }
 
-variable "FunctionAppHostKey" {
+variable "frontend_host_name" {
+  description = "The host name of the frontend that hosts the ASAP Portal for the platform"
   type        = string
-  description = "The admin's email in charge of APIM"
+  default     = ""
 }
 
 variable "azuread_tenant_id" {
+  description = "The Azure AD Tenant ID that is connected to the Sandbox Subscriptions."
   type        = string
-  description = "The admin's email in charge of APIM"
+  default     = ""
 }
