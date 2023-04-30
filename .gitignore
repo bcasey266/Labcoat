@@ -7,15 +7,15 @@ override.tf.json
 *_override.tf
 *_override.tf.json
 terraform.tfvars
+config.azurerm.tfbackend
 
 # Build Location Ignores
 Temp/
 
-# Reactjs Frontend Code Ignores
+# ReactJS Frontend Code Ignores
 .env
 node_modules
 App/FrontendPortal/build
 
 # Mac Folder
 .DS_Store
-config.azurerm.tfbackend
