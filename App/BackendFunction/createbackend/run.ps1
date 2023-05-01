@@ -45,22 +45,25 @@ try {
         "CostCenter"   = $QueueItem.CostCenter
     } | Out-Null
 
-    # Prep the Queue message
-    $QueueMessage = @{
-        "NotificationType" = "New"
-        "FirstName"        = $QueueItem.FirstName
-        "LastName"         = $QueueItem.LastName
-        "Email"            = $QueueItem.Email
-        "SandboxName"      = $SandboxName
-        "Budget"           = "{0:C0}" -f [int]$QueueItem.Budget
-        "DeleteOn"         = (Get-Date).AddDays([int]$QueueItem.Length).ToString("yyyy-MM-dd")
-    } | ConvertTo-Json
+    # Send a Notification if notifications have been enabled
+    if ($env:NotificationsEnabled -eq "true") {
+        # Prep the Queue message
+        $QueueMessage = @{
+            "NotificationType" = "New"
+            "FirstName"        = $QueueItem.FirstName
+            "LastName"         = $QueueItem.LastName
+            "Email"            = $QueueItem.Email
+            "SandboxName"      = $SandboxName
+            "Budget"           = "{0:C0}" -f [int]$QueueItem.Budget
+            "DeleteOn"         = (Get-Date).AddDays([int]$QueueItem.Length).ToString("yyyy-MM-dd")
+        } | ConvertTo-Json
 
-    #Add Message to Queue
-    $EncodedMessage = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($QueueMessage))
-    $StorageQueue = Get-AzStorageQueue -Name $env:StorageQueueNotifications -Context $StorageAccount.Context
-    $StorageQueue.QueueClient.SendMessageAsync($EncodedMessage) | Out-Null
-
+        #Add Message to Queue
+        $EncodedMessage = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($QueueMessage))
+        $StorageQueue = Get-AzStorageQueue -Name $env:StorageQueueNotifications -Context $StorageAccount.Context
+        $StorageQueue.QueueClient.SendMessageAsync($EncodedMessage) | Out-Null
+    }
+    
     Write-Information "Sandbox has been created!"
 }
 catch {

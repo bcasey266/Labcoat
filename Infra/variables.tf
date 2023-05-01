@@ -152,6 +152,12 @@ variable "frontend_app_registration_name" {
   default     = ""
 }
 
+variable "enable_notifications" {
+  description = "This boolean value will enable built-in notification capabilities which will deploy out a Logic App with email templates"
+  type        = bool
+  default     = true
+}
+
 variable "logic_app_name" {
   description = "The name of the Logic App resource used for notifications"
   type        = string

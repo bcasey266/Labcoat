@@ -68,6 +68,7 @@ resource "azurerm_windows_function_app" "this" {
     "StorageQueueNewSandbox"                   = azurerm_storage_queue.newsandbox.name
     "StorageQueueDeleteSandbox"                = azurerm_storage_queue.deletesandbox.name
     "StorageQueueResetSandbox"                 = azurerm_storage_queue.resetsandbox.name
+    "NotificationsEnabled"                     = var.enable_notifications
     "StorageQueueNotifications"                = var.queue_notifications
     "StorageTableSandbox"                      = azurerm_storage_table.this.name
     "SandboxManagementSubscription"            = var.platform_subscription_id

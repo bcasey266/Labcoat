@@ -57,6 +57,8 @@ api_management_admin_email = ""
 
 frontend_app_registration_name = ""
 
+enable_notifications = true
+
 logic_app_name = ""
 
 logic_app_region = "eastus2"
