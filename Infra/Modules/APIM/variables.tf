@@ -46,12 +46,6 @@ variable "function_app_host_name" {
   default     = ""
 }
 
-variable "function_app_host_key" {
-  description = "The host key that authorizes requests to the Function App for the platform"
-  type        = string
-  default     = ""
-}
-
 variable "frontend_host_name" {
   description = "The host name of the frontend that hosts the ASAP Portal for the platform"
   type        = string

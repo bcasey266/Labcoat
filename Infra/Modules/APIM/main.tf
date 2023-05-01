@@ -81,7 +81,7 @@ resource "azurerm_api_management_backend" "this" {
   url                 = "https://${var.function_app_host_name}/api"
   credentials {
     header = {
-      "x-functions-key" = var.function_app_host_key
+      "x-functions-key" = data.azurerm_function_app_host_keys.deploykeys.default_function_key
     }
   }
 }
@@ -109,7 +109,7 @@ resource "azurerm_api_management_api_policy" "this" {
         <cors allow-credentials="true">
             <allowed-origins>
                 <origin>http://localhost:3000/</origin>
-                <origin>https://${var.function_app_host_name}/</origin>
+                <origin>https://${var.frontend_host_name}/</origin>
             </allowed-origins>
             <allowed-methods preflight-result-max-age="300">
                 <method>GET</method>
