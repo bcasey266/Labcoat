@@ -156,7 +156,9 @@ module "FunctionApp" {
 
   storage_account_name              = azurerm_storage_account.this.name
   storage_account_connection_string = azurerm_key_vault_secret.storage_account_connection_string.versionless_id
-  queue_notifications               = module.Notifications.queue_notifications
+
+  enable_notifications = var.enable_notifications
+  queue_notifications  = var.enable_notifications == true ? module.Notifications[0].queue_notifications : null
 
   subnet_integration_id = var.enable_private_networking == true ? module.Networking[0].subnet_integration_ids : null
   ip_allowlist          = var.ip_allowlist
@@ -170,10 +172,13 @@ module "FunctionApp" {
 
   platform_subscription_id      = data.azurerm_client_config.current.subscription_id
   sandbox_azure_subscription_id = var.sandbox_azure_subscription_id
-  frontend_url                  = module.Frontend.frontend_url
+
+  enable_frontend = var.enable_frontend
+  frontend_url    = var.enable_frontend == true ? module.Frontend[0].frontend_url : null
 }
 
 module "Notifications" {
+  count  = var.enable_notifications == true ? 1 : 0
   source = "./Modules/Notifications"
 
   logic_app_name      = var.logic_app_name
@@ -188,8 +193,9 @@ module "Notifications" {
   azuread_tenant_id             = var.azuread_tenant_id
   platform_subscription_id      = data.azurerm_client_config.current.subscription_id
   sandbox_azure_subscription_id = var.sandbox_azure_subscription_id
-  frontend_url                  = module.Frontend.frontend_url
 
+  enable_frontend = var.enable_frontend
+  frontend_url    = var.enable_frontend == true ? module.Frontend[0].frontend_url : null
 }
 
 module "APIM" {
@@ -205,13 +211,15 @@ module "APIM" {
 
   function_app_name      = module.FunctionApp.function_app_name
   function_app_host_name = module.FunctionApp.function_app_host_name
-  function_app_host_key  = module.FunctionApp.function_app_name
 
-  frontend_host_name = module.Frontend.frontend_host_name
-  azuread_tenant_id  = var.azuread_tenant_id
+  enable_frontend    = var.enable_frontend
+  frontend_host_name = var.enable_frontend == true ? module.Frontend[0].frontend_host_name : null
+
+  azuread_tenant_id = var.azuread_tenant_id
 }
 
 module "Frontend" {
+  count  = var.enable_frontend == true ? 1 : 0
   source = "./Modules/Frontend"
 
   app_service_plan_frontend_name = var.app_service_plan_frontend_name
@@ -229,5 +237,4 @@ module "Frontend" {
   frontend_app_id               = module.APIM.frontend_app_id
   sandbox_azure_subscription_id = var.sandbox_azure_subscription_id
   azuread_tenant_id             = var.azuread_tenant_id
-
 }

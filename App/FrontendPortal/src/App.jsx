@@ -141,7 +141,7 @@ const WebForm = () => {
           console.log(accessTokenResponse);
 
           const response = await fetch(
-            process.env.REACT_APP_APIMName +
+            process.env.REACT_APP_api_management_name +
               '/' +
               process.env.REACT_APP_APIName +
               process.env.REACT_APP_APICreate,
@@ -154,7 +154,6 @@ const WebForm = () => {
               body: JSON.stringify(payload),
             }
           );
-
           console.log(accessToken);
 
           if (response.ok) {

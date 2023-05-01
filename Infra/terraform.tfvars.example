@@ -45,6 +45,8 @@ app_service_plan_name = ""
 
 function_app_name = ""
 
+enable_frontend = true
+
 app_service_plan_frontend_name = ""
 
 web_app_frontend_name = ""
@@ -56,6 +58,8 @@ api_management_admin_name = ""
 api_management_admin_email = ""
 
 frontend_app_registration_name = ""
+
+enable_notifications = true
 
 logic_app_name = ""
 

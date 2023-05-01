@@ -63,11 +63,12 @@ resource "azurerm_windows_function_app" "this" {
     "WEBSITE_CONTENTOVERVNET"                  = 1
     "WEBSITE_SKIP_CONTENTSHARE_VALIDATION"     = 1
     "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING" = "@Microsoft.KeyVault(SecretUri=${var.storage_account_connection_string})"
-    "resource_group_name"                      = var.resource_group_name
-    "storage_account_name"                     = var.storage_account_name
+    "ResourceGroupName"                        = var.resource_group_name
+    "StorageAccountName"                       = var.storage_account_name
     "StorageQueueNewSandbox"                   = azurerm_storage_queue.newsandbox.name
     "StorageQueueDeleteSandbox"                = azurerm_storage_queue.deletesandbox.name
     "StorageQueueResetSandbox"                 = azurerm_storage_queue.resetsandbox.name
+    "NotificationsEnabled"                     = var.enable_notifications
     "StorageQueueNotifications"                = var.queue_notifications
     "StorageTableSandbox"                      = azurerm_storage_table.this.name
     "SandboxManagementSubscription"            = var.platform_subscription_id
@@ -110,7 +111,7 @@ resource "azurerm_windows_function_app" "this" {
     }
 
     cors {
-      allowed_origins = ["http://localhost:3000", "https://${var.frontend_url}"]
+      allowed_origins = var.enable_frontend == true ? ["http://localhost:3000", "https://${var.frontend_url}"] : ["http://localhost:3000"]
     }
   }
 }

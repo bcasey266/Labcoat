@@ -108,17 +108,29 @@ foreach ($Sandbox in $ActiveSandboxes) {
 
     # Submit the Sandbox for deletion
     if ($SandboxCost -ge $($Sandbox.Budget) -or [datetime]$($Sandbox.EndDate) -le (Get-Date)) {
+        
+        # Configure the Deletion Reason
+        if ($SandboxCost -ge $($Sandbox.Budget)) {
+            $DeletionReason = "Overbudget"
+        }
+        else {
+            $DeletionReason = "Over Time Limit"
+        }
+
         Set-AzContext -SubscriptionId $env:SandboxManagementSubscription | Out-Null
         $QueueMessage = @{
-            "SandboxName" = $Sandbox.Rowkey
+            "SandboxName"    = $Sandbox.Rowkey
+            "DeletionReason" = $DeletionReason
         }  | ConvertTo-Json
 
         # Add Message to Queue
         $EncodedMessage = [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes($QueueMessage))
         $StorageQueue = Get-AzStorageQueue -Name $env:StorageQueueDeleteSandbox -Context $StorageAccount.Context
         $StorageQueue.QueueClient.SendMessageAsync($EncodedMessage) | Out-Null
-    } # If it's Friday, add a message to the Logic App queue to send a Sandbox Status Report email.
-    elseif ($($Date.DayOfWeek) -eq "Friday") {
+
+    } # If it's Friday and notifications are enabled, add a message to the Logic App queue to send a Sandbox Status Report email.
+    elseif ($($Date.DayOfWeek) -eq "Friday" -and $env:NotificationsEnabled -eq "true") {
+        
         Set-AzContext -SubscriptionId $env:SandboxManagementSubscription | Out-Null
         $QueueMessage = @{
             "NotificationType" = "Status"
@@ -126,7 +138,7 @@ foreach ($Sandbox in $ActiveSandboxes) {
             "Email"            = $Sandbox.User
             "FirstName"        = $Sandbox.FirstName
             "DeleteOn"         = $Sandbox.EndDate
-            "DaysLeft"         = ($Sandbox.EndDate - $Date).Days
+            "DaysLeft"         = (([datetime]$Sandbox.EndDate - $Date).Days + 1).ToString() # An extra day is added through "+1" due to Powershell rounding down on the day
             "CurrentCost"      = "{0:C0}" -f [int]$SandboxCost
         }  | ConvertTo-Json
 

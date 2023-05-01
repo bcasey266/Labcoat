@@ -39,6 +39,12 @@ variable "storage_account_connection_string" {
   default     = ""
 }
 
+variable "enable_notifications" {
+  description = "This boolean value will enable built-in notification capabilities which will deploy out a Logic App with email templates"
+  type        = bool
+  default     = true
+}
+
 variable "queue_notifications" {
   description = "The name of the Queue used for sending notifications from the Logic App"
   type        = string
@@ -107,6 +113,12 @@ variable "sandbox_azure_subscription_id" {
   description = "The Azure Subscription ID that will host the Sandbox Resource Groups."
   type        = string
   default     = ""
+}
+
+variable "enable_frontend" {
+  description = "This boolean value will enable the pre-built frontend portal for ASAP"
+  type        = bool
+  default     = true
 }
 
 variable "frontend_url" {

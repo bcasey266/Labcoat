@@ -71,7 +71,7 @@ resource "azurerm_logic_app_workflow" "this" {
       type         = "Object"
     }),
     "frontend" : jsonencode({
-      "defaultValue" : "https://${var.frontend_url}/",
+      "defaultValue" : var.enable_frontend == true ? "https://${var.frontend_url}/" : "",
       "type" : "String"
     }),
     "SandboxSubscription" : jsonencode({
