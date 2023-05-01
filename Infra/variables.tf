@@ -116,6 +116,12 @@ variable "function_app_name" {
   default     = ""
 }
 
+variable "enable_frontend" {
+  description = "This boolean value will enable the pre-built frontend portal for ASAP"
+  type        = bool
+  default     = true
+}
+
 variable "app_service_plan_frontend_name" {
   description = "The name of the App Service Plan that hosts the ASAP Portal. This is different due to a difference in SKU and compatibility problems."
   type        = string

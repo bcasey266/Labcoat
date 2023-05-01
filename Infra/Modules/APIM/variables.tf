@@ -46,6 +46,12 @@ variable "function_app_host_name" {
   default     = ""
 }
 
+variable "enable_frontend" {
+  description = "This boolean value will enable the pre-built frontend portal for ASAP"
+  type        = bool
+  default     = true
+}
+
 variable "frontend_host_name" {
   description = "The host name of the frontend that hosts the ASAP Portal for the platform"
   type        = string

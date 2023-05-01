@@ -111,7 +111,7 @@ resource "azurerm_windows_function_app" "this" {
     }
 
     cors {
-      allowed_origins = ["http://localhost:3000", "https://${var.frontend_url}"]
+      allowed_origins = var.enable_frontend == true ? ["http://localhost:3000", "https://${var.frontend_url}"] : ["http://localhost:3000"]
     }
   }
 }

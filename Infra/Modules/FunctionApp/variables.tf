@@ -115,6 +115,12 @@ variable "sandbox_azure_subscription_id" {
   default     = ""
 }
 
+variable "enable_frontend" {
+  description = "This boolean value will enable the pre-built frontend portal for ASAP"
+  type        = bool
+  default     = true
+}
+
 variable "frontend_url" {
   description = "The URL of the Frontend Portal"
   type        = string

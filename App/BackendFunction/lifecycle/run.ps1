@@ -129,7 +129,7 @@ foreach ($Sandbox in $ActiveSandboxes) {
         $StorageQueue.QueueClient.SendMessageAsync($EncodedMessage) | Out-Null
 
     } # If it's Friday and notifications are enabled, add a message to the Logic App queue to send a Sandbox Status Report email.
-    elseif ($($Date.DayOfWeek) -eq "Monday" -and $env:NotificationsEnabled -eq "true") {
+    elseif ($($Date.DayOfWeek) -eq "Friday" -and $env:NotificationsEnabled -eq "true") {
         
         Set-AzContext -SubscriptionId $env:SandboxManagementSubscription | Out-Null
         $QueueMessage = @{
