@@ -4,7 +4,7 @@ resource "azurerm_service_plan" "this" {
   resource_group_name = var.resource_group_name
 
   os_type  = "Windows"
-  sku_name = "EP2"
+  sku_name = "EP1"
 }
 
 resource "azurerm_storage_share" "this" {
