@@ -13,10 +13,10 @@ import { LogLevel } from "@azure/msal-browser";
 
 export const msalConfig = {
   auth: {
-    clientId: process.env.REACT_APP_clientID,
+    clientId: process.env.NEXT_PUBLIC_clientID,
     authority:
-      "https://login.microsoftonline.com/" + process.env.REACT_APP_TenantID,
-    redirectUri: process.env.REACT_APP_redirectUri,
+      "https://login.microsoftonline.com/" + process.env.NEXT_PUBLIC_TenantID,
+    redirectUri: process.env.NEXT_PUBLIC_redirectUri,
   },
   cache: {
     cacheLocation: "sessionStorage", // This configures where your cache will be stored

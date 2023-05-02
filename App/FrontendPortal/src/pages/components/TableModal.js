@@ -1,8 +1,8 @@
 // TableModal.js
-import React, { useState, useEffect } from 'react';
-import { useMsal, useIsAuthenticated } from '@azure/msal-react';
-import { InteractionRequiredAuthError } from '@azure/msal-browser';
-import { loginRequest } from '../authConfig';
+import React, { useState, useEffect } from "react";
+import { useMsal, useIsAuthenticated } from "@azure/msal-react";
+import { InteractionRequiredAuthError } from "@azure/msal-browser";
+import { loginRequest } from "../../components/authConfig";
 
 import {
   Button,
@@ -25,18 +25,18 @@ import {
   Spinner,
   Tooltip,
   useToast,
-} from '@chakra-ui/react';
+} from "@chakra-ui/react";
 
-import { DeleteIcon, RepeatIcon, LinkIcon } from '@chakra-ui/icons';
-import AlertDialogWithActions from './AlertDialog';
+import { DeleteIcon, RepeatIcon, LinkIcon } from "@chakra-ui/icons";
+import AlertDialogWithActions from "./AlertDialog";
 
 const fieldsToDisplay = [
-  'RowKey',
-  'ManagerEmail',
-  'Budget',
-  'CostCenter',
-  'EndDate',
-  'Status',
+  "RowKey",
+  "ManagerEmail",
+  "Budget",
+  "CostCenter",
+  "EndDate",
+  "Status",
 ];
 
 const TableModal = ({ isOpen, onClose }) => {
@@ -45,9 +45,8 @@ const TableModal = ({ isOpen, onClose }) => {
   const [isResetOpen, setisResetOpen] = React.useState(false);
   const [selectedSandbox, setSelectedSandbox] = React.useState(null);
   const toast = useToast();
-  const [showActiveOnly, setShowActiveOnly] = useState(
-    localStorage.getItem('showActiveOnly') === 'true' ? true : false
-  );
+  const [showActiveOnly, setShowActiveOnly] = React.useState(false);
+
   const isAuthenticated = useIsAuthenticated();
   const [sandboxes, setSandboxes] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -74,21 +73,21 @@ const TableModal = ({ isOpen, onClose }) => {
     try {
       await sandboxAction(
         selectedSandbox.RowKey,
-        process.env.REACT_APP_APIDelete
+        process.env.NEXT_PUBLIC_APIDelete
       );
       handleDeleteConfirmClose();
       toast({
-        title: 'Submission Received',
+        title: "Submission Received",
         description: `Sandbox ${selectedSandbox.RowKey} has been queued for deletion.`,
-        status: 'success',
+        status: "success",
         duration: 5000,
         isClosable: true,
       });
     } catch (error) {
       toast({
-        title: 'Deletion Failed',
+        title: "Deletion Failed",
         description: `Error deleting sandbox ${selectedSandbox.RowKey}. Please try again.`,
-        status: 'error',
+        status: "error",
         duration: 5000,
         isClosable: true,
       });
@@ -99,20 +98,20 @@ const TableModal = ({ isOpen, onClose }) => {
     try {
       await sandboxAction(
         selectedSandbox.RowKey,
-        process.env.REACT_APP_APIReset
+        process.env.NEXT_PUBLIC_APIReset
       );
       toast({
-        title: 'Submission Received',
+        title: "Submission Received",
         description: `Sandbox ${selectedSandbox.RowKey} has been queued for reset.`,
-        status: 'success',
+        status: "success",
         duration: 5000,
         isClosable: true,
       });
     } catch (error) {
       toast({
-        title: 'Deletion Failed',
+        title: "Deletion Failed",
         description: `Error resetting sandbox ${selectedSandbox.RowKey}. Please try again.`,
-        status: 'error',
+        status: "error",
         duration: 5000,
         isClosable: true,
       });
@@ -121,20 +120,20 @@ const TableModal = ({ isOpen, onClose }) => {
 
   const handleLink = (sandbox) => {
     setSelectedSandbox(sandbox);
-    const url = `https://portal.azure.com/#@/resource/subscriptions/${process.env.REACT_APP_SandboxSubscription}/resourceGroups/${sandbox.RowKey}/overview`;
-    window.open(url, '_blank');
+    const url = `https://portal.azure.com/#@/resource/subscriptions/${process.env.NEXT_PUBLIC_SandboxSubscription}/resourceGroups/${sandbox.RowKey}/overview`;
+    window.open(url, "_blank");
   };
 
-  const headers = [...fieldsToDisplay, 'Reset', 'Delete', 'Browse'].map(
+  const headers = [...fieldsToDisplay, "Reset", "Delete", "Browse"].map(
     (header) => {
-      if (header === 'RowKey') {
-        return 'Sandbox Name';
-      } else if (header === 'ManagerEmail') {
-        return 'Manager Email';
-      } else if (header === 'CostCenter') {
-        return 'Cost Center';
-      } else if (header === 'EndDate') {
-        return 'End Date';
+      if (header === "RowKey") {
+        return "Sandbox Name";
+      } else if (header === "ManagerEmail") {
+        return "Manager Email";
+      } else if (header === "CostCenter") {
+        return "Cost Center";
+      } else if (header === "EndDate") {
+        return "End Date";
       } else {
         return header;
       }
@@ -142,11 +141,15 @@ const TableModal = ({ isOpen, onClose }) => {
   );
 
   const filteredData = showActiveOnly
-    ? sandboxes.filter((item) => item.Status === 'Active')
+    ? sandboxes.filter((item) => item.Status === "Active")
     : sandboxes;
 
   useEffect(() => {
-    localStorage.setItem('showActiveOnly', showActiveOnly);
+    localStorage.getItem("showActiveOnly") === "true" ? true : false;
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("showActiveOnly", showActiveOnly);
   }, [showActiveOnly]);
 
   useEffect(() => {
@@ -167,10 +170,10 @@ const TableModal = ({ isOpen, onClose }) => {
               await instance.acquireTokenRedirect(loginRequest);
               getSandboxes();
             } catch (error) {
-              console.error('Error acquiring token:', error);
+              console.error("Error acquiring token:", error);
             }
           } else {
-            console.error('Error fetching users:', error);
+            console.error("Error fetching users:", error);
           }
         }
       }
@@ -179,9 +182,9 @@ const TableModal = ({ isOpen, onClose }) => {
   }, [instance, isAuthenticated, accounts, isOpen]);
 
   async function fetchSandboxes(accessToken) {
-    const endpoint = `${process.env.REACT_APP_api_management_name}/${process.env.REACT_APP_APIName}/${process.env.REACT_APP_APIList}?ObjectID=${accounts[0].localAccountId}`;
+    const endpoint = `${process.env.NEXT_PUBLIC_api_management_name}/${process.env.NEXT_PUBLIC_APIName}/${process.env.NEXT_PUBLIC_APIList}?ObjectID=${accounts[0].localAccountId}`;
     const headers = new Headers();
-    headers.append('Authorization', `Bearer ${accessToken}`);
+    headers.append("Authorization", `Bearer ${accessToken}`);
     const response = await fetch(endpoint, { headers });
     if (!response.ok) {
       throw new Error(`Error fetching users: ${response.statusText}`);
@@ -202,24 +205,24 @@ const TableModal = ({ isOpen, onClose }) => {
         account: accounts[0],
         forceRefresh: true,
       });
-      const endpoint = `${process.env.REACT_APP_api_management_name}/${process.env.REACT_APP_APIName}${action}`;
+      const endpoint = `${process.env.NEXT_PUBLIC_api_management_name}/${process.env.NEXT_PUBLIC_APIName}${action}`;
       const headers = new Headers();
-      headers.append('Authorization', `Bearer ${accessToken.idToken}`);
-      headers.append('Content-Type', 'application/json');
+      headers.append("Authorization", `Bearer ${accessToken.idToken}`);
+      headers.append("Content-Type", "application/json");
 
-      console.log('Sandbox Name:', sandboxName);
-      console.log('Object ID:', accounts[0].localAccountId);
+      console.log("Sandbox Name:", sandboxName);
+      console.log("Object ID:", accounts[0].localAccountId);
 
       const requestBody = {
         SandboxName: sandboxName,
         ObjectID: accounts[0].localAccountId,
       };
 
-      console.log('Request Body:', JSON.stringify(requestBody));
-      console.log('ID Token:', accessToken.idToken);
+      console.log("Request Body:", JSON.stringify(requestBody));
+      console.log("ID Token:", accessToken.idToken);
 
       const requestOptions = {
-        method: 'POST',
+        method: "POST",
         headers: headers,
         body: JSON.stringify(requestBody),
       };
@@ -262,23 +265,23 @@ const TableModal = ({ isOpen, onClose }) => {
 
   return (
     <>
-      <Modal isOpen={isOpen} onClose={onClose} size='xl'>
+      <Modal isOpen={isOpen} onClose={onClose} size="xl">
         <ModalOverlay
-          bg='blackAlpha.300'
-          backdropFilter='blur(10px) hue-rotate(90deg)'
+          bg="blackAlpha.300"
+          backdropFilter="blur(10px) hue-rotate(90deg)"
         />
-        <ModalContent maxWidth='90vw' minWidth='60vw' width='auto'>
+        <ModalContent maxWidth="90vw" minWidth="60vw" width="auto">
           <ModalHeader>My Sandboxes</ModalHeader>
           <ModalCloseButton />
-          <ModalBody maxHeight='70vh'>
-            <Flex justifyContent='flex-end'>
+          <ModalBody maxHeight="70vh">
+            <Flex justifyContent="flex-end">
               <Button onClick={() => setShowActiveOnly(!showActiveOnly)}>
-                {showActiveOnly ? 'Show All' : 'Show Active Only'}
+                {showActiveOnly ? "Show All" : "Show Active Only"}
               </Button>
             </Flex>
-            <Box maxHeight='70vh' overflowY='auto'>
+            <Box maxHeight="70vh" overflowY="auto">
               {!loading ? (
-                <Table variant='simple'>
+                <Table variant="simple">
                   <Thead>
                     <Tr>
                       {headers.map((header) => (
@@ -293,49 +296,49 @@ const TableModal = ({ isOpen, onClose }) => {
                           <Td
                             key={field}
                             color={
-                              field === 'Status'
-                                ? item[field] === 'Active'
-                                  ? 'green.500'
-                                  : item[field] === 'Deleted'
-                                  ? 'red.500'
-                                  : item[field] === 'Creating'
-                                  ? 'orange.500'
-                                  : item[field] === 'Deleting'
-                                  ? 'orange.500'
-                                  : item[field] === 'Resetting'
-                                  ? 'orange.500'
+                              field === "Status"
+                                ? item[field] === "Active"
+                                  ? "green.500"
+                                  : item[field] === "Deleted"
+                                  ? "red.500"
+                                  : item[field] === "Creating"
+                                  ? "orange.500"
+                                  : item[field] === "Deleting"
+                                  ? "orange.500"
+                                  : item[field] === "Resetting"
+                                  ? "orange.500"
                                   : null
                                 : null
                             }
                           >
-                            {field === 'Budget'
-                              ? new Intl.NumberFormat('en-US', {
-                                  style: 'currency',
-                                  currency: 'USD',
+                            {field === "Budget"
+                              ? new Intl.NumberFormat("en-US", {
+                                  style: "currency",
+                                  currency: "USD",
                                   maximumFractionDigits: 0,
                                 }).format(item[field])
-                              : field === 'RowKey'
-                              ? item['RowKey']
+                              : field === "RowKey"
+                              ? item["RowKey"]
                               : item[field]}
                           </Td>
                         ))}
                         <Td>
-                          <Flex justifyContent='center'>
+                          <Flex justifyContent="center">
                             <Box>
-                              {item.Status === 'Resetting' ? (
-                                <Spinner size='sm' />
+                              {item.Status === "Resetting" ? (
+                                <Spinner size="sm" />
                               ) : (
                                 <Tooltip
-                                  label='Reset Sandbox'
-                                  aria-label='Reset Sandbox'
+                                  label="Reset Sandbox"
+                                  aria-label="Reset Sandbox"
                                   openDelay={500}
                                 >
                                   <IconButton
-                                    aria-label='Reset Sandbox'
+                                    aria-label="Reset Sandbox"
                                     icon={<RepeatIcon />}
-                                    size='sm'
+                                    size="sm"
                                     onClick={() => handleResetClick(item)}
-                                    isDisabled={item.Status !== 'Active'}
+                                    isDisabled={item.Status !== "Active"}
                                   />
                                 </Tooltip>
                               )}
@@ -343,22 +346,22 @@ const TableModal = ({ isOpen, onClose }) => {
                           </Flex>
                         </Td>
                         <Td>
-                          <Flex justifyContent='center'>
+                          <Flex justifyContent="center">
                             <Box>
-                              {item.Status === 'Deleting' ? (
-                                <Spinner size='sm' />
+                              {item.Status === "Deleting" ? (
+                                <Spinner size="sm" />
                               ) : (
                                 <Tooltip
-                                  label='Delete Sandbox'
-                                  aria-label='Delete Sandbox'
+                                  label="Delete Sandbox"
+                                  aria-label="Delete Sandbox"
                                   openDelay={500}
                                 >
                                   <IconButton
-                                    aria-label='Delete Sandbox'
+                                    aria-label="Delete Sandbox"
                                     icon={<DeleteIcon />}
-                                    size='sm'
+                                    size="sm"
                                     onClick={() => handleDeleteClick(item)}
-                                    isDisabled={item.Status !== 'Active'}
+                                    isDisabled={item.Status !== "Active"}
                                   />
                                 </Tooltip>
                               )}
@@ -366,17 +369,17 @@ const TableModal = ({ isOpen, onClose }) => {
                           </Flex>
                         </Td>
                         <Td>
-                          <Flex justifyContent='center'>
+                          <Flex justifyContent="center">
                             <Tooltip
-                              label='View Sandbox'
-                              aria-label='View Sandbox'
+                              label="View Sandbox"
+                              aria-label="View Sandbox"
                               openDelay={500}
                             >
                               <IconButton
                                 icon={<LinkIcon />}
-                                size='sm'
+                                size="sm"
                                 onClick={() => handleLink(item)}
-                                isDisabled={item.Status !== 'Active'}
+                                isDisabled={item.Status !== "Active"}
                               />
                             </Tooltip>
                           </Flex>
@@ -386,14 +389,14 @@ const TableModal = ({ isOpen, onClose }) => {
                   </Tbody>
                 </Table>
               ) : (
-                <Flex justifyContent='center' alignItems='center' height='25vh'>
+                <Flex justifyContent="center" alignItems="center" height="25vh">
                   <Spinner />
                 </Flex>
               )}
             </Box>
           </ModalBody>
           <ModalFooter>
-            <Button colorScheme='blue' mr={3} onClick={onClose}>
+            <Button colorScheme="blue" mr={3} onClick={onClose}>
               Close
             </Button>
           </ModalFooter>
@@ -402,17 +405,17 @@ const TableModal = ({ isOpen, onClose }) => {
       <AlertDialogWithActions
         isOpen={isDeleteOpen}
         onClose={handleDeleteConfirmClose}
-        actionName='Delete'
+        actionName="Delete"
         onAction={() => handleDeleteSandbox(selectedSandbox)}
-        title='Delete Sandbox'
+        title="Delete Sandbox"
         message={`Are you sure you want to delete ${selectedSandbox?.RowKey}?`}
       />
       <AlertDialogWithActions
         isOpen={isResetOpen}
         onClose={handleResetConfirmClose}
-        actionName='Reset'
+        actionName="Reset"
         onAction={() => handleResetSandbox(selectedSandbox)}
-        title='Reset Sandbox'
+        title="Reset Sandbox"
         message={`Are you sure you want to reset ${selectedSandbox?.RowKey}?`}
       />
     </>

@@ -49,7 +49,6 @@ import {
   useMsalAuthentication,
 } from '@azure/msal-react';
 
-import './App.css';
 import './components/TableModal.js';
 import TableModal from './components/TableModal.js';
 /**
@@ -141,10 +140,10 @@ const WebForm = () => {
           console.log(accessTokenResponse);
 
           const response = await fetch(
-            process.env.REACT_APP_api_management_name +
+            process.env.NEXT_PUBLIC_api_management_name +
               '/' +
-              process.env.REACT_APP_APIName +
-              process.env.REACT_APP_APICreate,
+              process.env.NEXT_PUBLIC_APIName +
+              process.env.NEXT_PUBLIC_APICreate,
             {
               method: 'POST',
               headers: {
