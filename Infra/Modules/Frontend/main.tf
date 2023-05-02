@@ -30,7 +30,7 @@ data "archive_file" "this" {
   type        = "zip"
   source_dir  = "../App/FrontendPortal"
   output_path = "../Temp/frontendportal.zip"
-  excludes    = ["build", "node_modules", ".env", ".env.development"]
+  excludes    = ["build", "node_modules", ".env", ".env.development", ".next"]
 }
 
 resource "null_resource" "this" {
@@ -38,16 +38,16 @@ resource "null_resource" "this" {
     command = <<-EOT
     cd ../App/FrontendPortal
     New-Item -Path .env -force
-    Add-Content -Path .env -Value "REACT_APP_redirectUri=https://${azurerm_windows_web_app.this.default_hostname}"
-    Add-Content -Path .env -Value "REACT_APP_clientID=${var.frontend_app_id}"
-    Add-Content -Path .env -Value "REACT_APP_TenantID=${var.azuread_tenant_id}"
-    Add-Content -Path .env -Value "REACT_APP_SandboxSubscription=${var.sandbox_azure_subscription_id}"
-    Add-Content -Path .env -Value "REACT_APP_api_management_name=${var.api_management_gateway_url}"
-    Add-Content -Path .env -Value "REACT_APP_APIName=${var.api_name}"
-    Add-Content -Path .env -Value "REACT_APP_APICreate=${var.api_create_url}"
-    Add-Content -Path .env -Value "REACT_APP_APIList=${var.api_list_url}"
-    Add-Content -Path .env -Value "REACT_APP_APIDelete=${var.api_delete_url}"
-    Add-Content -Path .env -Value "REACT_APP_APIReset=${var.api_reset_url}"
+    Add-Content -Path .env -Value "NEXT_PUBLIC_redirectUri=https://${azurerm_windows_web_app.this.default_hostname}"
+    Add-Content -Path .env -Value "NEXT_PUBLIC_clientID=${var.frontend_app_id}"
+    Add-Content -Path .env -Value "NEXT_PUBLIC_TenantID=${var.azuread_tenant_id}"
+    Add-Content -Path .env -Value "NEXT_PUBLIC_SandboxSubscription=${var.sandbox_azure_subscription_id}"
+    Add-Content -Path .env -Value "NEXT_PUBLIC_api_management_name=${var.api_management_gateway_url}"
+    Add-Content -Path .env -Value "NEXT_PUBLIC_APIName=${var.api_name}"
+    Add-Content -Path .env -Value "NEXT_PUBLIC_APICreate=${var.api_create_url}"
+    Add-Content -Path .env -Value "NEXT_PUBLIC_APIList=${var.api_list_url}"
+    Add-Content -Path .env -Value "NEXT_PUBLIC_APIDelete=${var.api_delete_url}"
+    Add-Content -Path .env -Value "NEXT_PUBLIC_APIReset=${var.api_reset_url}"
 
     npm install
     npm run build
