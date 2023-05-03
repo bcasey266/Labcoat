@@ -134,6 +134,12 @@ variable "web_app_frontend_name" {
   default     = ""
 }
 
+variable "enable_apim" {
+  description = "This boolean value will enable the pre-built APIM resource for ASAP"
+  type        = bool
+  default     = true
+}
+
 variable "api_management_name" {
   description = "Azure APIM Name for ASAP"
   type        = string
