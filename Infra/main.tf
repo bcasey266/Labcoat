@@ -173,8 +173,8 @@ module "FunctionApp" {
   platform_subscription_id      = data.azurerm_client_config.current.subscription_id
   sandbox_azure_subscription_id = var.sandbox_azure_subscription_id
 
-  enable_frontend = var.enable_frontend
-  frontend_url    = var.enable_frontend == true ? module.Frontend[0].frontend_url : null
+  enable_frontend = var.enable_frontend == true && var.enable_apim == true ? true : false
+  frontend_url    = var.enable_frontend == true && var.enable_apim == true ? module.Frontend[0].frontend_url : null
 }
 
 module "Notifications" {
@@ -199,6 +199,7 @@ module "Notifications" {
 }
 
 module "APIM" {
+  count  = var.enable_apim == true ? 1 : 0
   source = "./Modules/APIM"
 
   api_management_name            = var.api_management_name
@@ -219,7 +220,7 @@ module "APIM" {
 }
 
 module "Frontend" {
-  count  = var.enable_frontend == true ? 1 : 0
+  count  = var.enable_frontend == true && var.enable_apim == true ? 1 : 0
   source = "./Modules/Frontend"
 
   app_service_plan_frontend_name = var.app_service_plan_frontend_name
@@ -227,14 +228,14 @@ module "Frontend" {
   region                         = azurerm_resource_group.this.location
   resource_group_name            = azurerm_resource_group.this.name
 
-  api_management_gateway_url = module.APIM.api_management_gateway_url
-  api_name                   = module.APIM.api_name
-  api_create_url             = module.APIM.api_create_url
-  api_list_url               = module.APIM.api_list_url
-  api_delete_url             = module.APIM.api_delete_url
-  api_reset_url              = module.APIM.api_reset_url
+  api_management_gateway_url = module.APIM[0].api_management_gateway_url
+  api_name                   = module.APIM[0].api_name
+  api_create_url             = module.APIM[0].api_create_url
+  api_list_url               = module.APIM[0].api_list_url
+  api_delete_url             = module.APIM[0].api_delete_url
+  api_reset_url              = module.APIM[0].api_reset_url
 
-  frontend_app_id               = module.APIM.frontend_app_id
+  frontend_app_id               = module.APIM[0].frontend_app_id
   sandbox_azure_subscription_id = var.sandbox_azure_subscription_id
   azuread_tenant_id             = var.azuread_tenant_id
 }
