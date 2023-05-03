@@ -31,7 +31,7 @@ application_insights_name = ""
 
 managed_identity_name = ""
 
-enable_private_networking = true
+enable_private_networking = true #must be kept as true. Future Improvement https://github.com/bcasey266/ASAP/issues/96
 
 vnet_name = ""
 
@@ -45,11 +45,13 @@ app_service_plan_name = ""
 
 function_app_name = ""
 
-enable_frontend = true
+enable_frontend = true #"enable_apim" must be true if this is true
 
 app_service_plan_frontend_name = ""
 
 web_app_frontend_name = ""
+
+enable_apim = true
 
 api_management_name = ""
 
