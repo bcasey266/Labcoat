@@ -224,7 +224,7 @@ module "Frontend" {
 
   app_service_plan_frontend_name = var.app_service_plan_frontend_name
   web_app_frontend_name          = var.web_app_frontend_name
-  region                         = var.logic_app_region
+  region                         = azurerm_resource_group.this.location
   resource_group_name            = azurerm_resource_group.this.name
 
   api_management_gateway_url = module.APIM.api_management_gateway_url
