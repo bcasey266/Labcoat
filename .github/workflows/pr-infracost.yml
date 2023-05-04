@@ -4,12 +4,8 @@ name: 'Infracost PR'
 # describe other options for 'on', 'pull_request' is a good default.
 on:
   pull_request:
-  workflow_call:
-    inputs:
-      environment:
-        description: 'The name of the environment to deploy to'
-        required: true
-        type: string
+    paths:
+      - 'Infra/**'
 
 jobs:
   infracost:

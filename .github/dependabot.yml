@@ -1,11 +1,25 @@
 version: 2
 updates:
-  - package-ecosystem: "github-actions"
-    directory: "/"
+  - package-ecosystem: 'github-actions'
+    directory: '/'
     schedule:
-      interval: "weekly"
-      
-  - package-ecosystem: "terraform"
-    directory: "/"
+      interval: 'weekly'
+    labels:
+      - 'GitHub Actions'
+      - 'dependencies'
+
+  - package-ecosystem: 'terraform'
+    directory: '/Infra'
     schedule:
-      interval: "weekly"
+      interval: 'weekly'
+    labels:
+      - 'IaC/Terraform'
+      - 'dependencies'
+
+  - package-ecosystem: 'npm'
+    directory: '/App/FrontendPortal'
+    schedule:
+      interval: 'weekly'
+    labels:
+      - 'Frontend'
+      - 'dependencies'
