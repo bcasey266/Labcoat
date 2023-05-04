@@ -3,15 +3,8 @@ resource "azurerm_service_plan" "this" {
   location            = var.region
   resource_group_name = var.resource_group_name
 
-  os_type  = "Windows"
-  sku_name = "EP1"
-}
-
-resource "azurerm_storage_share" "this" {
-  name                 = var.function_app_name
-  storage_account_name = var.storage_account_name
-
-  quota = 50
+  os_type  = "Linux"
+  sku_name = "B1"
 }
 
 resource "azurerm_storage_queue" "newsandbox" {
@@ -34,7 +27,7 @@ resource "azurerm_storage_table" "this" {
   storage_account_name = var.storage_account_name
 }
 
-resource "azurerm_windows_function_app" "this" {
+resource "azurerm_linux_function_app" "this" {
   name                = var.function_app_name
   location            = var.region
   resource_group_name = var.resource_group_name
@@ -44,6 +37,7 @@ resource "azurerm_windows_function_app" "this" {
   service_plan_id                 = azurerm_service_plan.this.id
   https_only                      = true
   virtual_network_subnet_id       = var.subnet_integration_id
+  builtin_logging_enabled         = false
 
   tags = {
     "hidden-link: /app-insights-conn-string"         = var.app_insights_connection_string
@@ -58,22 +52,19 @@ resource "azurerm_windows_function_app" "this" {
   }
 
   app_settings = {
-    "WEBSITE_RUN_FROM_PACKAGE"                 = "1"
-    "WEBSITE_CONTENTSHARE"                     = azurerm_storage_share.this.name
-    "WEBSITE_CONTENTOVERVNET"                  = 1
-    "WEBSITE_SKIP_CONTENTSHARE_VALIDATION"     = 1
-    "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING" = "@Microsoft.KeyVault(SecretUri=${var.storage_account_connection_string})"
-    "ResourceGroupName"                        = var.resource_group_name
-    "StorageAccountName"                       = var.storage_account_name
-    "StorageQueueNewSandbox"                   = azurerm_storage_queue.newsandbox.name
-    "StorageQueueDeleteSandbox"                = azurerm_storage_queue.deletesandbox.name
-    "StorageQueueResetSandbox"                 = azurerm_storage_queue.resetsandbox.name
-    "NotificationsEnabled"                     = var.enable_notifications
-    "StorageQueueNotifications"                = var.queue_notifications
-    "StorageTableSandbox"                      = azurerm_storage_table.this.name
-    "SandboxManagementSubscription"            = var.platform_subscription_id
-    "SandboxSubscription"                      = var.sandbox_azure_subscription_id
-    "ManagedIdentityClientID"                  = var.user_identity_client_id
+    "WEBSITE_RUN_FROM_PACKAGE"      = "1"
+    "WEBSITE_CONTENTOVERVNET"       = 1
+    "ResourceGroupName"             = var.resource_group_name
+    "StorageAccountName"            = var.storage_account_name
+    "StorageQueueNewSandbox"        = azurerm_storage_queue.newsandbox.name
+    "StorageQueueDeleteSandbox"     = azurerm_storage_queue.deletesandbox.name
+    "StorageQueueResetSandbox"      = azurerm_storage_queue.resetsandbox.name
+    "NotificationsEnabled"          = var.enable_notifications
+    "StorageQueueNotifications"     = var.queue_notifications
+    "StorageTableSandbox"           = azurerm_storage_table.this.name
+    "SandboxManagementSubscription" = var.platform_subscription_id
+    "SandboxSubscription"           = var.sandbox_azure_subscription_id
+    "ManagedIdentityClientID"       = var.user_identity_client_id
   }
 
   identity {
@@ -125,13 +116,13 @@ data "archive_file" "this" {
 resource "null_resource" "this" {
   provisioner "local-exec" {
     command = <<-EOT
-    az webapp deployment source config-zip --resource-group ${var.resource_group_name} --name ${azurerm_windows_function_app.this.name} --src ${data.archive_file.this.output_path} --only-show-errors > ../Temp/output.txt  
+    az webapp deployment source config-zip --resource-group ${var.resource_group_name} --name ${azurerm_linux_function_app.this.name} --src ${data.archive_file.this.output_path} --only-show-errors > ../Temp/output.txt  
     EOT
 
     interpreter = ["PowerShell", "-Command"]
   }
   triggers = {
     input_json    = filemd5(data.archive_file.this.output_path)
-    deploy_target = azurerm_windows_function_app.this.id
+    deploy_target = azurerm_linux_function_app.this.id
   }
 }

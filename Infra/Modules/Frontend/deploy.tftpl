@@ -1,0 +1,31 @@
+cd ../App/FrontendPortal
+New-Item -Path .env -force
+Add-Content -Path .env -Value "NEXT_PUBLIC_redirectUri=https://${azurerm_linux_web_app_default_hostname}"
+Add-Content -Path .env -Value "NEXT_PUBLIC_clientID=${frontend_app_id}"
+Add-Content -Path .env -Value "NEXT_PUBLIC_TenantID=${azuread_tenant_id}"
+Add-Content -Path .env -Value "NEXT_PUBLIC_SandboxSubscription=${sandbox_azure_subscription_id}"
+Add-Content -Path .env -Value "NEXT_PUBLIC_api_management_name=${api_management_gateway_url}"
+Add-Content -Path .env -Value "NEXT_PUBLIC_APIName=${api_name}"
+Add-Content -Path .env -Value "NEXT_PUBLIC_APICreate=${api_create_url}"
+Add-Content -Path .env -Value "NEXT_PUBLIC_APIList=${api_list_url}"
+Add-Content -Path .env -Value "NEXT_PUBLIC_APIDelete=${api_delete_url}"
+Add-Content -Path .env -Value "NEXT_PUBLIC_APIReset=${api_reset_url}"
+
+npm install
+npm run build
+Compress-Archive -Path build\* -DestinationPath ../../Temp/frontendbuild.zip -force
+    
+do {
+    if ($i) {
+        Write-Host "Deployment Failed (This can be normal).  Retrying $i of 4 after sleeping for $(60 * $i) seconds"
+        Start-Sleep -Seconds (60 * $i)
+    }
+    $result = az webapp deployment source config-zip --resource-group ${resource_group_name} --name ${azurerm_linux_web_app_name} --src ../../Temp/frontendbuild.zip
+    $i++  
+} until (
+    $null -ne $result -or $i -ge 5
+)
+
+if ($result -eq $null) {
+    throw "Deployment failed. This is usually due to the App Service Plan still being fully booted up.  Retrying Terraform Apply should fix it"
+}

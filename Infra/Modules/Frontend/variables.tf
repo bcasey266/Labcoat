@@ -57,6 +57,12 @@ variable "api_reset_url" {
   default     = ""
 }
 
+variable "app_service_plan_id" {
+  description = "The resource ID of the App Service Plan"
+  type        = string
+  default     = ""
+}
+
 variable "frontend_app_id" {
   description = "The ID of the Frontend Azure AD App Registration"
   type        = string

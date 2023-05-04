@@ -120,7 +120,6 @@ resource "azurerm_application_insights" "this" {
 }
 
 module "Networking" {
-  count  = var.enable_private_networking == true ? 1 : 0
   source = "./Modules/Networking"
 
   vnet_name           = var.vnet_name
@@ -160,7 +159,7 @@ module "FunctionApp" {
   enable_notifications = var.enable_notifications
   queue_notifications  = var.enable_notifications == true ? module.Notifications[0].queue_notifications : null
 
-  subnet_integration_id = var.enable_private_networking == true ? module.Networking[0].subnet_integration_ids : null
+  subnet_integration_id = module.Networking.subnet_integration_id
   ip_allowlist          = var.ip_allowlist
 
   user_identity_id        = azurerm_user_assigned_identity.this.id
@@ -225,7 +224,7 @@ module "Frontend" {
 
   app_service_plan_frontend_name = var.app_service_plan_frontend_name
   web_app_frontend_name          = var.web_app_frontend_name
-  region                         = var.logic_app_region
+  region                         = azurerm_resource_group.this.location
   resource_group_name            = azurerm_resource_group.this.name
 
   api_management_gateway_url = module.APIM[0].api_management_gateway_url
@@ -235,6 +234,7 @@ module "Frontend" {
   api_delete_url             = module.APIM[0].api_delete_url
   api_reset_url              = module.APIM[0].api_reset_url
 
+  app_service_plan_id           = module.FunctionApp.app_service_plan_id
   frontend_app_id               = module.APIM[0].frontend_app_id
   sandbox_azure_subscription_id = var.sandbox_azure_subscription_id
   azuread_tenant_id             = var.azuread_tenant_id

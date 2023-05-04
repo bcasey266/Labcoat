@@ -1,18 +1,10 @@
-resource "azurerm_service_plan" "this" {
-  name                = var.app_service_plan_frontend_name
-  location            = var.region
-  resource_group_name = var.resource_group_name
-
-  os_type  = "Windows"
-  sku_name = "B1"
-}
-
-resource "azurerm_windows_web_app" "this" {
+resource "azurerm_linux_web_app" "this" {
   name                = var.web_app_frontend_name
   location            = var.region
   resource_group_name = var.resource_group_name
 
-  service_plan_id = azurerm_service_plan.this.id
+  service_plan_id = var.app_service_plan_id
+  https_only      = true
 
   app_settings = {
     "WEBSITE_RUN_FROM_PACKAGE" = "1"
@@ -35,32 +27,28 @@ data "archive_file" "this" {
 
 resource "null_resource" "this" {
   provisioner "local-exec" {
-    command = <<-EOT
-    cd ../App/FrontendPortal
-    New-Item -Path .env -force
-    Add-Content -Path .env -Value "NEXT_PUBLIC_redirectUri=https://${azurerm_windows_web_app.this.default_hostname}"
-    Add-Content -Path .env -Value "NEXT_PUBLIC_clientID=${var.frontend_app_id}"
-    Add-Content -Path .env -Value "NEXT_PUBLIC_TenantID=${var.azuread_tenant_id}"
-    Add-Content -Path .env -Value "NEXT_PUBLIC_SandboxSubscription=${var.sandbox_azure_subscription_id}"
-    Add-Content -Path .env -Value "NEXT_PUBLIC_api_management_name=${var.api_management_gateway_url}"
-    Add-Content -Path .env -Value "NEXT_PUBLIC_APIName=${var.api_name}"
-    Add-Content -Path .env -Value "NEXT_PUBLIC_APICreate=${var.api_create_url}"
-    Add-Content -Path .env -Value "NEXT_PUBLIC_APIList=${var.api_list_url}"
-    Add-Content -Path .env -Value "NEXT_PUBLIC_APIDelete=${var.api_delete_url}"
-    Add-Content -Path .env -Value "NEXT_PUBLIC_APIReset=${var.api_reset_url}"
-
-    npm install
-    npm run build
-    Compress-Archive -Path build\* -DestinationPath ../../Temp/frontendbuild.zip -force
-    az webapp deployment source config-zip --resource-group ${var.resource_group_name} --name ${azurerm_windows_web_app.this.name} --src ../../Temp/frontendbuild.zip --only-show-errors > ../../Temp/frontendoutput.txt
-    EOT
+    command = templatefile("Modules/Frontend/deploy.tftpl",
+      {
+        azurerm_linux_web_app_default_hostname = "${azurerm_linux_web_app.this.default_hostname}"
+        frontend_app_id                        = "${var.frontend_app_id}"
+        azuread_tenant_id                      = "${var.azuread_tenant_id}"
+        sandbox_azure_subscription_id          = "${var.sandbox_azure_subscription_id}"
+        api_management_gateway_url             = "${var.api_management_gateway_url}"
+        api_name                               = "${var.api_name}"
+        api_create_url                         = "${var.api_create_url}"
+        api_list_url                           = "${var.api_list_url}"
+        api_delete_url                         = "${var.api_delete_url}"
+        api_reset_url                          = "${var.api_reset_url}"
+        resource_group_name                    = "${var.resource_group_name}"
+        azurerm_linux_web_app_name             = "${azurerm_linux_web_app.this.name}"
+    })
 
     interpreter = ["PowerShell", "-Command"]
   }
   triggers = {
     input_json                    = filemd5(data.archive_file.this.output_path)
-    deploy_target                 = azurerm_windows_web_app.this.id
-    webapphostname                = azurerm_windows_web_app.this.default_hostname
+    deployscript                  = filemd5("Modules/Frontend/deploy.tftpl")
+    deploy_target                 = azurerm_linux_web_app.this.id
     clientid                      = var.frontend_app_id
     api_management_name           = var.api_management_gateway_url
     tenantid                      = var.azuread_tenant_id

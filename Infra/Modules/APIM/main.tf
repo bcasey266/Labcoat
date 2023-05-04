@@ -73,7 +73,7 @@ resource "azurerm_api_management" "this" {
 }
 
 resource "azurerm_api_management_backend" "this" {
-  name                = var.function_app_name
+  name                = "ASAP"
   resource_group_name = var.resource_group_name
 
   api_management_name = azurerm_api_management.this.name
