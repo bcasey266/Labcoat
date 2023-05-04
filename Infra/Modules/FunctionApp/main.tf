@@ -54,6 +54,7 @@ resource "azurerm_linux_function_app" "this" {
   app_settings = {
     "WEBSITE_RUN_FROM_PACKAGE"      = "1"
     "WEBSITE_CONTENTOVERVNET"       = 1
+    "StorageConnectionString"       = "@Microsoft.KeyVault(SecretUri=${var.storage_account_connection_string})"
     "ResourceGroupName"             = var.resource_group_name
     "StorageAccountName"            = var.storage_account_name
     "StorageQueueNewSandbox"        = azurerm_storage_queue.newsandbox.name
@@ -104,6 +105,11 @@ resource "azurerm_linux_function_app" "this" {
     cors {
       allowed_origins = var.enable_frontend == true ? ["http://localhost:3000", "https://${var.frontend_url}"] : ["http://localhost:3000"]
     }
+
+    app_service_logs {
+      disk_quota_mb         = 100
+      retention_period_days = 7
+    }
   }
 }
 
@@ -116,7 +122,7 @@ data "archive_file" "this" {
 resource "null_resource" "this" {
   provisioner "local-exec" {
     command = <<-EOT
-    az webapp deployment source config-zip --resource-group ${var.resource_group_name} --name ${azurerm_linux_function_app.this.name} --src ${data.archive_file.this.output_path} --only-show-errors > ../Temp/output.txt  
+    az webapp deployment source config-zip --resource-group ${var.resource_group_name} --name ${azurerm_linux_function_app.this.name} --src ${data.archive_file.this.output_path}
     EOT
 
     interpreter = ["PowerShell", "-Command"]

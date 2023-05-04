@@ -45,8 +45,6 @@ function_app_name = ""
 
 enable_frontend = true #"enable_apim" must be true if this is true
 
-app_service_plan_frontend_name = ""
-
 web_app_frontend_name = ""
 
 enable_apim = true

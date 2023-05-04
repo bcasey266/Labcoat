@@ -1,8 +1,3 @@
-variable "app_service_plan_frontend_name" {
-  type        = string
-  description = "Resource Group Name for ASAP that contains the platform level resources"
-}
-
 variable "web_app_frontend_name" {
   description = "The name of the Web App resource that hosts the frontend portal"
   type        = string

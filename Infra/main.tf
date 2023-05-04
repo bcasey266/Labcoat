@@ -222,10 +222,9 @@ module "Frontend" {
   count  = var.enable_frontend == true && var.enable_apim == true ? 1 : 0
   source = "./Modules/Frontend"
 
-  app_service_plan_frontend_name = var.app_service_plan_frontend_name
-  web_app_frontend_name          = var.web_app_frontend_name
-  region                         = azurerm_resource_group.this.location
-  resource_group_name            = azurerm_resource_group.this.name
+  web_app_frontend_name = var.web_app_frontend_name
+  region                = azurerm_resource_group.this.location
+  resource_group_name   = azurerm_resource_group.this.name
 
   api_management_gateway_url = module.APIM[0].api_management_gateway_url
   api_name                   = module.APIM[0].api_name

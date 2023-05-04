@@ -5,7 +5,7 @@
       "type": "queueTrigger",
       "direction": "in",
       "queueName": "%StorageQueueResetSandbox%",
-      "connection": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING"
+      "connection": "StorageConnectionString"
     }
   ]
 }
