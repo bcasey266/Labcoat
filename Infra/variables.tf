@@ -116,12 +116,6 @@ variable "enable_frontend" {
   default     = true
 }
 
-variable "app_service_plan_frontend_name" {
-  description = "The name of the App Service Plan that hosts the ASAP Portal. This is different due to a difference in SKU and compatibility problems."
-  type        = string
-  default     = ""
-}
-
 variable "web_app_frontend_name" {
   description = "The name of the Web App resource that hosts the frontend portal"
   type        = string

@@ -15,6 +15,24 @@ resource "azurerm_linux_web_app" "this" {
     minimum_tls_version         = "1.2"
     vnet_route_all_enabled      = true
     scm_use_main_ip_restriction = true
+
+    application_stack {
+      php_version = "8.2"
+    }
+  }
+
+  logs {
+    application_logs {
+      file_system_level = "Information"
+    }
+    detailed_error_messages = true
+    failed_request_tracing  = true
+    http_logs {
+      file_system {
+        retention_in_days = 7
+        retention_in_mb   = 100
+      }
+    }
   }
 }
 
