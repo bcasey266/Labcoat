@@ -78,14 +78,8 @@ variable "managed_identity_name" {
   default     = ""
 }
 
-variable "enable_private_networking" {
-  description = "If enabled, a Virtual Network will be created and all resources will be connected through Private Endpoints instead of communicating publicly"
-  type        = bool
-  default     = true
-}
-
 variable "vnet_name" {
-  description = "Name of the VNET that will be created if enable_private_networking is enabled"
+  description = "Name of the VNET that will be created"
   type        = string
   default     = ""
 }

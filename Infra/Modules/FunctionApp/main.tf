@@ -4,7 +4,7 @@ resource "azurerm_service_plan" "this" {
   resource_group_name = var.resource_group_name
 
   os_type  = "Linux"
-  sku_name = "B2"
+  sku_name = "B1"
 }
 
 resource "azurerm_storage_queue" "newsandbox" {

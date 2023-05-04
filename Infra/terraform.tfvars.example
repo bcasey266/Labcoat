@@ -31,8 +31,6 @@ application_insights_name = ""
 
 managed_identity_name = ""
 
-enable_private_networking = true #must be kept as true. Future Improvement https://github.com/bcasey266/ASAP/issues/96
-
 vnet_name = ""
 
 vnet_ip_space = [{

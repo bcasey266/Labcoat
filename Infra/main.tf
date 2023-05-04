@@ -120,7 +120,6 @@ resource "azurerm_application_insights" "this" {
 }
 
 module "Networking" {
-  count  = var.enable_private_networking == true ? 1 : 0
   source = "./Modules/Networking"
 
   vnet_name           = var.vnet_name
@@ -160,7 +159,7 @@ module "FunctionApp" {
   enable_notifications = var.enable_notifications
   queue_notifications  = var.enable_notifications == true ? module.Notifications[0].queue_notifications : null
 
-  subnet_integration_id = var.enable_private_networking == true ? module.Networking[0].subnet_integration_ids : null
+  subnet_integration_id = module.Networking.subnet_integration_id
   ip_allowlist          = var.ip_allowlist
 
   user_identity_id        = azurerm_user_assigned_identity.this.id
