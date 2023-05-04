@@ -7,6 +7,8 @@ updates:
     labels:
       - 'GitHub Actions'
       - 'dependencies'
+    commit-message:
+      prefix: 'chore'
 
   - package-ecosystem: 'terraform'
     directory: '/Infra'
@@ -15,6 +17,8 @@ updates:
     labels:
       - 'IaC/Terraform'
       - 'dependencies'
+    commit-message:
+      prefix: 'chore'
 
   - package-ecosystem: 'npm'
     directory: '/App/FrontendPortal'
@@ -23,3 +27,5 @@ updates:
     labels:
       - 'Frontend'
       - 'dependencies'
+    commit-message:
+      prefix: 'chore'
