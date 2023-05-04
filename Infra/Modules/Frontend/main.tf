@@ -47,8 +47,8 @@ resource "null_resource" "this" {
   }
   triggers = {
     input_json                    = filemd5(data.archive_file.this.output_path)
+    deployscript                  = filemd5("Modules/Frontend/deploy.tftpl")
     deploy_target                 = azurerm_linux_web_app.this.id
-    webapphostname                = azurerm_linux_web_app.this.default_hostname
     clientid                      = var.frontend_app_id
     api_management_name           = var.api_management_gateway_url
     tenantid                      = var.azuread_tenant_id

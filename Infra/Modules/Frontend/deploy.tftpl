@@ -17,11 +17,15 @@ Compress-Archive -Path build\* -DestinationPath ../../Temp/frontendbuild.zip -fo
     
 do {
     if ($i) {
-        Write-Host "Deployment Failed (This can be normal).  Retrying $i of 4"
-        Start-Sleep -Seconds 30
+        Write-Host "Deployment Failed (This can be normal).  Retrying $i of 4 after sleeping for $(60 * $i) seconds"
+        Start-Sleep -Seconds (60 * $i)
     }
-    $result = az webapp deployment source config-zip --resource-group ${resource_group_name} --name ${azurerm_linux_web_app_name} --src ../../Temp/frontendbuild.zip > ../../Temp/frontendoutput.txt
+    $result = az webapp deployment source config-zip --resource-group ${resource_group_name} --name ${azurerm_linux_web_app_name} --src ../../Temp/frontendbuild.zip
     $i++  
 } until (
     $null -ne $result -or $i -ge 5
 )
+
+if ($result -eq $null) {
+    throw "Deployment failed. This is usually due to the App Service Plan still being fully booted up.  Retrying Terraform Apply should fix it"
+}
