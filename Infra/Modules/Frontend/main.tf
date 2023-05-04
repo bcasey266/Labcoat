@@ -1,18 +1,10 @@
-resource "azurerm_service_plan" "this" {
-  name                = var.app_service_plan_frontend_name
-  location            = var.region
-  resource_group_name = var.resource_group_name
-
-  os_type  = "Windows"
-  sku_name = "B1"
-}
-
-resource "azurerm_windows_web_app" "this" {
+resource "azurerm_linux_web_app" "this" {
   name                = var.web_app_frontend_name
   location            = var.region
   resource_group_name = var.resource_group_name
 
-  service_plan_id = azurerm_service_plan.this.id
+  service_plan_id = var.app_service_plan_id
+  https_only      = true
 
   app_settings = {
     "WEBSITE_RUN_FROM_PACKAGE" = "1"
@@ -38,7 +30,7 @@ resource "null_resource" "this" {
     command = <<-EOT
     cd ../App/FrontendPortal
     New-Item -Path .env -force
-    Add-Content -Path .env -Value "NEXT_PUBLIC_redirectUri=https://${azurerm_windows_web_app.this.default_hostname}"
+    Add-Content -Path .env -Value "NEXT_PUBLIC_redirectUri=https://${azurerm_linux_web_app.this.default_hostname}"
     Add-Content -Path .env -Value "NEXT_PUBLIC_clientID=${var.frontend_app_id}"
     Add-Content -Path .env -Value "NEXT_PUBLIC_TenantID=${var.azuread_tenant_id}"
     Add-Content -Path .env -Value "NEXT_PUBLIC_SandboxSubscription=${var.sandbox_azure_subscription_id}"
@@ -52,15 +44,15 @@ resource "null_resource" "this" {
     npm install
     npm run build
     Compress-Archive -Path build\* -DestinationPath ../../Temp/frontendbuild.zip -force
-    az webapp deployment source config-zip --resource-group ${var.resource_group_name} --name ${azurerm_windows_web_app.this.name} --src ../../Temp/frontendbuild.zip --only-show-errors > ../../Temp/frontendoutput.txt
+    az webapp deployment source config-zip --resource-group ${var.resource_group_name} --name ${azurerm_linux_web_app.this.name} --src ../../Temp/frontendbuild.zip --only-show-errors > ../../Temp/frontendoutput.txt
     EOT
 
     interpreter = ["PowerShell", "-Command"]
   }
   triggers = {
     input_json                    = filemd5(data.archive_file.this.output_path)
-    deploy_target                 = azurerm_windows_web_app.this.id
-    webapphostname                = azurerm_windows_web_app.this.default_hostname
+    deploy_target                 = azurerm_linux_web_app.this.id
+    webapphostname                = azurerm_linux_web_app.this.default_hostname
     clientid                      = var.frontend_app_id
     api_management_name           = var.api_management_gateway_url
     tenantid                      = var.azuread_tenant_id

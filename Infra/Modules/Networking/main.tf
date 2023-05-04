@@ -129,39 +129,6 @@ resource "azurerm_private_endpoint" "blob" {
   }
 }
 
-resource "azurerm_private_dns_zone" "file" {
-  name                = "privatelink.file.core.windows.net"
-  resource_group_name = azurerm_virtual_network.this.resource_group_name
-}
-
-resource "azurerm_private_dns_zone_virtual_network_link" "file_link" {
-  name                = var.vnet_name
-  resource_group_name = azurerm_virtual_network.this.resource_group_name
-
-  private_dns_zone_name = azurerm_private_dns_zone.file.name
-  virtual_network_id    = azurerm_virtual_network.this.id
-}
-
-resource "azurerm_private_endpoint" "file" {
-  name                = "${var.storage_account_name}-file-pe"
-  location            = var.region
-  resource_group_name = azurerm_virtual_network.this.resource_group_name
-
-  subnet_id = azurerm_subnet.private_endpoint.id
-
-  private_service_connection {
-    name                           = "${var.storage_account_name}-file-pe"
-    private_connection_resource_id = var.storage_account_id
-    subresource_names              = ["file"]
-    is_manual_connection           = false
-  }
-
-  private_dns_zone_group {
-    name                 = "${var.storage_account_name}-file-pe"
-    private_dns_zone_ids = ["${azurerm_private_dns_zone.file.id}"]
-  }
-}
-
 resource "azurerm_private_dns_zone" "queue" {
   name                = "privatelink.queue.core.windows.net"
   resource_group_name = azurerm_virtual_network.this.resource_group_name

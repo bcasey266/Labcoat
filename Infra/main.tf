@@ -235,6 +235,7 @@ module "Frontend" {
   api_delete_url             = module.APIM[0].api_delete_url
   api_reset_url              = module.APIM[0].api_reset_url
 
+  app_service_plan_id           = module.FunctionApp.app_service_plan_id
   frontend_app_id               = module.APIM[0].frontend_app_id
   sandbox_azure_subscription_id = var.sandbox_azure_subscription_id
   azuread_tenant_id             = var.azuread_tenant_id
