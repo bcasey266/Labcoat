@@ -7,7 +7,7 @@
     "@azure/msal-react": "^1.5.7",
     "@chakra-ui/icons": "^2.0.19",
     "@chakra-ui/react": "^2.6.1",
-    "@emotion/react": "^11.10.8",
+    "@emotion/react": "^11.11.0",
     "@emotion/styled": "^11.11.0",
     "bootstrap": "^5.2.3",
     "react": "^18.2.0",
