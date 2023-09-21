@@ -2,10 +2,10 @@
     "recommendations": [
         "ms-vscode.vscode-node-azure-pack",
         "ms-vscode.powershell",
-        "tfsec.tfsec",
         "azapi-vscode.azapi",
         "esbenp.prettier-vscode",
         "hashicorp.terraform",
-        "ms-azuretools.vscode-azureterraform"
+        "ms-azuretools.vscode-azureterraform",
+        "bridgecrew.checkov"
     ]
 }
