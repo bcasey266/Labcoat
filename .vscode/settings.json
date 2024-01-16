@@ -1,12 +1,26 @@
 {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
     "editor.formatOnSave": true,
     "editor.formatOnPaste": true,
-    "[javascript]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  },
-  "[javascriptreact]": {
-        "editor.defaultFormatter": "esbenp.prettier-vscode"
-    },
-    "prettier.jsxSingleQuote": true,
-    "prettier.singleQuote": true,
+    "cSpell.language": "en,en-US",
+    "cSpell.words": [
+        "*.sh",
+        "armresources",
+        "azcore",
+        "azidentity",
+        "eastus",
+        "Fatalf",
+        "Getenv",
+        "gitleaks",
+        "gruntwork",
+        "linenums",
+        "OIDC",
+        "PCPA",
+        "resourcemanager",
+        "Sprintf",
+        "stretchr",
+        "tfvars",
+        "Terratest"
+    ],
+    "prettier.configPath": "resources/prettier/.prettierrc"
 }
