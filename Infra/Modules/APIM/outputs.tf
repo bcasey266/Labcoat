@@ -1,11 +1,11 @@
 output "api_admin_consent" {
   description = "Manual step required on the first deploy of the platform"
-  value       = "Please consent to the App Registrations's API Permissions: https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/CallAnAPI/appId/${azuread_application.this.application_id}/isMSAApp~/false"
+  value       = "Please consent to the App Registrations's API Permissions: https://portal.azure.com/#view/Microsoft_AAD_RegisteredApps/ApplicationMenuBlade/~/CallAnAPI/appId/${azuread_application.this.client_id}/isMSAApp~/false"
 }
 
 output "frontend_app_id" {
   description = "The ID of the Frontend Azure AD App Registration"
-  value       = azuread_application.this.application_id
+  value       = azuread_application.this.client_id
 }
 
 output "api_management_gateway_url" {

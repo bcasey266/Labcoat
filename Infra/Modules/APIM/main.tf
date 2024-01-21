@@ -19,7 +19,7 @@ resource "azuread_application" "this" {
   api {
     requested_access_token_version = 2
     oauth2_permission_scope {
-      admin_consent_description  = "Allow the ASAP Portal to Read AD"
+      admin_consent_description  = "Allow the Labcoat Portal to Read AD"
       admin_consent_display_name = "Consent Acknowledgement"
       enabled                    = true
       id                         = random_uuid.this.result
@@ -53,9 +53,9 @@ resource "azuread_application" "this" {
 }
 
 resource "azuread_application_pre_authorized" "this" {
-  application_object_id = azuread_application.this.object_id
-  authorized_app_id     = azuread_application.this.application_id
-  permission_ids        = [random_uuid.this.result]
+  application_id       = azuread_application.this.id
+  authorized_client_id = azuread_application.this.client_id
+  permission_ids       = [random_uuid.this.result]
 }
 
 resource "azurerm_api_management" "this" {
@@ -73,7 +73,7 @@ resource "azurerm_api_management" "this" {
 }
 
 resource "azurerm_api_management_backend" "this" {
-  name                = "ASAP"
+  name                = "Labcoat"
   resource_group_name = var.resource_group_name
 
   api_management_name = azurerm_api_management.this.name
@@ -125,7 +125,7 @@ resource "azurerm_api_management_api_policy" "this" {
             <openid-config url="https://login.microsoftonline.com/${var.azuread_tenant_id}/v2.0/.well-known/openid-configuration" />
             <required-claims>
                 <claim name="aud">
-                    <value>${azuread_application.this.application_id}</value>
+                    <value>${azuread_application.this.client_id}</value>
                 </claim>
             </required-claims>
         </validate-jwt>
