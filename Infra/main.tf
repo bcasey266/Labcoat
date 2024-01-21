@@ -186,6 +186,7 @@ module "Notifications" {
 
   resource_group_id = azurerm_resource_group.this.id
 
+  email_service        = lower(var.email_service)
   storage_account_name = azurerm_storage_account.this.name
   storage_account_id   = azurerm_storage_account.this.id
 

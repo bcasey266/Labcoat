@@ -21,6 +21,8 @@ resource "azapi_resource" "queueapiconnection" {
 }
 
 resource "azapi_resource" "office365apiconnection" {
+  count = var.email_service == "office365" ? 1 : 0
+
   type                      = "Microsoft.Web/connections@2016-06-01"
   schema_validation_enabled = false
   name                      = "office365"
@@ -32,6 +34,27 @@ resource "azapi_resource" "office365apiconnection" {
         name        = "office365",
         displayName = "Office 365 Outlook",
         id          = "/subscriptions/${var.platform_subscription_id}/providers/Microsoft.Web/locations/${var.logic_app_region}/managedApis/office365",
+        type        = "Microsoft.Web/locations/managedApis"
+      }
+    }
+  })
+  response_export_values = ["properties.api.id"]
+}
+
+resource "azapi_resource" "outlookapiconnection" {
+  count = var.email_service == "outlook" ? 1 : 0
+
+  type                      = "Microsoft.Web/connections@2016-06-01"
+  schema_validation_enabled = false
+  name                      = "outlook"
+  location                  = var.logic_app_region
+  parent_id                 = var.resource_group_id
+  body = jsonencode({
+    properties = {
+      api = {
+        name        = "outlook",
+        displayName = "Outlook.com",
+        id          = "/subscriptions/${var.platform_subscription_id}/providers/Microsoft.Web/locations/${var.logic_app_region}/managedApis/outlook",
         type        = "Microsoft.Web/locations/managedApis"
       }
     }
@@ -58,10 +81,10 @@ resource "azurerm_logic_app_workflow" "this" {
           }
         }
       },
-      (azapi_resource.office365apiconnection.name) = {
-        connectionId   = azapi_resource.office365apiconnection.id
-        connectionName = azapi_resource.office365apiconnection.name
-        id             = jsondecode(azapi_resource.office365apiconnection.output).properties.api.id
+      (var.email_service == "office365" ? azapi_resource.office365apiconnection[0].name : azapi_resource.outlookapiconnection[0].name) = {
+        connectionId   = var.email_service == "office365" ? azapi_resource.office365apiconnection[0].id : azapi_resource.outlookapiconnection[0].id
+        connectionName = var.email_service == "office365" ? azapi_resource.office365apiconnection[0].name : azapi_resource.outlookapiconnection[0].name
+        id             = var.email_service == "office365" ? jsondecode(azapi_resource.office365apiconnection[0].output).properties.api.id : jsondecode(azapi_resource.outlookapiconnection[0].output).properties.api.id
       }
     })
   }
@@ -260,7 +283,7 @@ resource "azurerm_logic_app_action_custom" "switch" {
               },
               "host" : {
                 "connection" : {
-                  "name" : "@parameters('$connections')['${azapi_resource.office365apiconnection.name}']['connectionId']"
+                  "name" : "@parameters('$connections')['${var.email_service == "office365" ? azapi_resource.office365apiconnection[0].name : azapi_resource.outlookapiconnection[0].name}']['connectionId']"
                 }
               },
               "method" : "post",
@@ -284,7 +307,7 @@ resource "azurerm_logic_app_action_custom" "switch" {
               },
               "host" : {
                 "connection" : {
-                  "name" : "@parameters('$connections')['${azapi_resource.office365apiconnection.name}']['connectionId']"
+                  "name" : "@parameters('$connections')['${var.email_service == "office365" ? azapi_resource.office365apiconnection[0].name : azapi_resource.outlookapiconnection[0].name}']['connectionId']"
                 }
               },
               "method" : "post",
@@ -308,7 +331,7 @@ resource "azurerm_logic_app_action_custom" "switch" {
               },
               "host" : {
                 "connection" : {
-                  "name" : "@parameters('$connections')['${azapi_resource.office365apiconnection.name}']['connectionId']"
+                  "name" : "@parameters('$connections')['${var.email_service == "office365" ? azapi_resource.office365apiconnection[0].name : azapi_resource.outlookapiconnection[0].name}']['connectionId']"
                 }
               },
               "method" : "post",

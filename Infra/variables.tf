@@ -169,3 +169,9 @@ variable "logic_app_region" {
   type        = string
   default     = "eastus2"
 }
+
+variable "email_service" {
+  description = "What email service should be used to send emails. Valid options are Office365 and Outlook"
+  type        = string
+  default     = "Office365"
+}

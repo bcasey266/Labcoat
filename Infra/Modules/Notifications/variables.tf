@@ -51,6 +51,12 @@ variable "platform_subscription_id" {
   default     = ""
 }
 
+variable "email_service" {
+  description = "What email service should be used to send emails. Valid options are Office365 and Outlook"
+  type        = string
+  default     = "Office365"
+}
+
 variable "sandbox_azure_subscription_id" {
   description = "The Azure Subscription ID that will host the Sandbox Resource Groups."
   type        = string
