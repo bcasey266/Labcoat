@@ -128,7 +128,7 @@ resource "null_resource" "this" {
     interpreter = ["PowerShell", "-Command"]
   }
   triggers = {
-    input_json    = filemd5(data.archive_file.this.output_path)
+    input_path    = filemd5(data.archive_file.this.output_path)
     deploy_target = azurerm_linux_function_app.this.id
   }
 }
