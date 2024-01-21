@@ -116,7 +116,7 @@ variable "sandbox_azure_subscription_id" {
 }
 
 variable "enable_frontend" {
-  description = "This boolean value will enable the pre-built frontend portal for ASAP"
+  description = "This boolean value will enable the pre-built frontend portal for Labcoat"
   type        = bool
   default     = true
 }

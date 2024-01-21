@@ -111,7 +111,7 @@ variable "function_app_name" {
 }
 
 variable "enable_frontend" {
-  description = "This boolean value will enable the pre-built frontend portal for ASAP"
+  description = "This boolean value will enable the pre-built frontend portal for Labcoat"
   type        = bool
   default     = true
 }
@@ -123,13 +123,13 @@ variable "web_app_frontend_name" {
 }
 
 variable "enable_apim" {
-  description = "This boolean value will enable the pre-built APIM resource for ASAP"
+  description = "This boolean value will enable the pre-built APIM resource for Labcoat"
   type        = bool
   default     = true
 }
 
 variable "api_management_name" {
-  description = "Azure APIM Name for ASAP"
+  description = "Azure APIM Name for Labcoat"
   type        = string
   default     = ""
 }

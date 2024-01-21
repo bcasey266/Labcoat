@@ -1,5 +1,5 @@
 variable "api_management_name" {
-  description = "Azure APIM Name for ASAP"
+  description = "Azure APIM Name for Labcoat"
   type        = string
   default     = ""
 }
@@ -47,13 +47,13 @@ variable "function_app_host_name" {
 }
 
 variable "enable_frontend" {
-  description = "This boolean value will enable the pre-built frontend portal for ASAP"
+  description = "This boolean value will enable the pre-built frontend portal for Labcoat"
   type        = bool
   default     = true
 }
 
 variable "frontend_host_name" {
-  description = "The host name of the frontend that hosts the ASAP Portal for the platform"
+  description = "The host name of the frontend that hosts the Labcoat Portal for the platform"
   type        = string
   default     = ""
 }

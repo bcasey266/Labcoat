@@ -1,5 +1,5 @@
 output "frontend_host_name" {
-  description = "The host name of the frontend that hosts the ASAP Portal for the platform"
+  description = "The host name of the frontend that hosts the Labcoat Portal for the platform"
   value       = azurerm_linux_web_app.this.default_hostname
 }
 
