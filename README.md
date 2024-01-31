@@ -1,4 +1,4 @@
-# Cloud Labcoat
+# Labcoat
 
 ## Overview
 
